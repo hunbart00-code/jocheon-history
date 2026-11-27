@@ -750,3 +750,86 @@ body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
 @keyframes splash-dot { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-10px); opacity: 1; } }
 /* 도전하기 글씨: 두꺼운 검은 테두리 대신 얇은 테두리 + 부드러운 그림자 */
 .gauge .challenge { text-shadow: 0 1px 0 rgba(42,20,8,0.95), 1px 0 0 rgba(42,20,8,0.95), -1px 0 0 rgba(42,20,8,0.95), 0 -1px 0 rgba(42,20,8,0.95), 0 0.1em 0.22em rgba(0,0,0,0.4); letter-spacing: 0.02em; }
+
+/* =============================================================
+   반듯한 배치 (v1.8)
+   - 위쪽 줄 박스는 모두 같은 높이(--row), 두 줄로 쌓인 칸은 같은 폭(--colw)
+   - 판넬 글자 크기는 안쪽 글자에만 줘서 나무 테두리 두께가 모두 같아요
+   - 왼쪽 도구 줄과 오른쪽 게이지는 같은 높이에서 시작 (좌우 대칭)
+   - 아래 버튼 5개는 같은 크기, 양쪽 여백도 같게
+   ============================================================= */
+:root { --row: 3.5em; --colw: 15.5em; --hgap: 0.45em; --top: 0.6em; --side: 0.8em; --btnh: 5.6em; }
+.hud-top { gap: 0.7em; }
+.col { margin-top: var(--top); gap: var(--hgap); width: var(--colw); flex: none; }
+.gold-wrap { margin: var(--top) auto 0; gap: var(--hgap); width: var(--colw); align-items: stretch; flex: none; }
+.right { margin-top: var(--top); gap: 0.5em; align-items: stretch; flex: none; }
+.hud-top .panel { font-size: 1em; height: var(--row); min-width: 0; box-sizing: border-box; }
+.era-name { width: 100%; padding: 0 0.9em; justify-content: center; }
+.era-name span { font-size: 1.55em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player { width: 100%; padding: 0 0.9em 0 0.65em; gap: 0.55em; }
+.player img { width: 2.3em; height: 2.3em; flex: none; }
+.player div { min-width: 0; line-height: 1.15; }
+.player small { font-size: 0.82em; }
+.player b { font-size: 1.28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gold { width: 100%; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
+.gold img.ico { width: 2em; height: 2em; flex: none; }
+#gold { font-size: 1.7em; }
+.rate { padding: 0.5em 1em 0.55em; gap: 0.3em; justify-content: center; border-radius: 0.8em; }
+#rate { font-size: 1.05em; line-height: 1.1; }
+.rate .store { width: 100%; height: 0.95em; }
+.rate .store em { font-size: 0.72em; }
+.kp { min-width: 9.8em; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
+.kp img.ico { width: 2em; height: 2em; flex: none; }
+#kp { font-size: 1.55em; }
+.fame { min-width: 6.2em; padding: 0 0.8em 0 0.65em; gap: 0.4em; justify-content: center; }
+.fame img.ico { width: 1.8em; height: 1.8em; flex: none; }
+#fame { font-size: 1.35em; }
+.hud-top .gear { width: var(--row); height: var(--row); flex: none; }
+.hud-top .gear img.ico { width: 2.3em; height: 2.3em; }
+.hud-top .save-btn img.ico { width: 1.7em; height: 1.7em; margin-top: -0.7em; }
+/* 왼쪽 도구 · 오른쪽 게이지: 두 번째 줄 아래 같은 높이에서 시작 */
+.side-tools { top: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.9em); left: calc(var(--side) + var(--sl)); gap: 0.45em; }
+.gauge { top: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.9em); right: calc(var(--side) + var(--sr)); bottom: calc(var(--btnh) + 1.6em + var(--badge)); width: 7.4em; gap: 0.5em; }
+.gauge .g-title { font-size: 1em; height: var(--row); line-height: 1.2; padding: 0 0.5em; flex: none; }
+.gauge .challenge { font-size: 1.1em; height: 2.9em; padding: 0 0.6em; flex: none; }
+.goal { bottom: calc(var(--btnh) + 1.6em + var(--badge)); }
+.b-panel { bottom: calc(var(--btnh) + 1.6em + var(--badge)); }
+/* 아래 버튼 5개: 같은 크기 */
+.bottom { gap: 0.8em; padding: 0 calc(var(--side) + var(--sr)) calc(0.9em + var(--badge)) calc(var(--side) + var(--sl)); }
+.bottom .big { flex: 1 1 0; max-width: 16.5em; min-width: 0; height: var(--btnh); padding: 0 0.9em; gap: 0.5em; }
+.big.red { flex-basis: 0; }
+.big img.ico { width: 2.3em; height: 2.3em; flex: none; }
+.big .two img.ico { width: 2em; height: 2em; }
+.big img.hero-ic { border-radius: 0.45em; border: 0.12em solid #ffe9a8; background: #f3e6c4; image-rendering: pixelated; filter: drop-shadow(0 0.1em 0 rgba(0,0,0,0.35)); }
+.bottom .big b { font-size: 1.4em; white-space: nowrap; }
+.big.teal { background: linear-gradient(180deg, #4fc2b4, #2a9a8c 55%, #1d6f66); box-shadow: inset 0 0.4em 0 rgba(255,255,255,0.18), 0 0.35em 0 #12443e; }
+.big.amber { background: linear-gradient(180deg, #ffd85a, #e8a72a 55%, #b8780e); box-shadow: inset 0 0.4em 0 rgba(255,255,255,0.22), 0 0.35em 0 #6a4206; }
+@media (max-width: 760px) { .fame { display: none; } }
+/* 가로 휴대폰 */
+@media (max-height: 520px) {
+  :root { --row: 3.3em; --colw: 14.6em; --hgap: 0.35em; --top: 0.45em; --side: 0.6em; --btnh: 4.5em; }
+  .ribbon { height: 7.8em; }
+  .era-name span { font-size: 1.4em; }
+  #gold { font-size: 1.55em; } #kp { font-size: 1.4em; } #fame { font-size: 1.2em; }
+  .kp { min-width: 8.6em; } .fame { min-width: 5.6em; }
+  .side-tools { gap: 0.3em; }
+  .tool { width: 4.6em; }
+  .tool .t-ic { width: 3em; height: 3em; } .tool .t-ic img.ico { width: 2.15em; height: 2.15em; }
+  .tool .t-lb { font-size: 0.82em; }
+  .gauge { width: 6.6em; }
+  .gauge .challenge { font-size: 1em; height: 2.6em; }
+  .bottom { padding-left: calc(var(--side) + var(--sl)); gap: 0.6em; }
+  .bottom .big { padding: 0 0.7em; gap: 0.4em; }
+  .big img.ico { width: 1.85em; height: 1.85em; } .big .two img.ico { width: 1.6em; height: 1.6em; }
+  .bottom .big b { font-size: 1.12em; }
+}
+/* 아주 낮은 화면: 왼쪽 도구를 더 작게 */
+@media (max-height: 380px) {
+  .tool .t-ic { width: 2.7em; height: 2.7em; } .tool .t-ic img.ico { width: 1.95em; height: 1.95em; }
+  .tool .t-lb { font-size: 0.76em; margin-top: -0.45em; }
+  .side-tools { gap: 0.2em; }
+}
+/* 빨간 리본은 두 번째 줄 끝까지만 (왼쪽 도구 줄과 겹치지 않게) */
+.ribbon { height: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.25em); padding-top: 1.2em; gap: 0.45em; }
+.taegeuk { width: 2.6em; height: 2.6em; }
+@media (max-height: 520px) { .ribbon { height: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.25em); padding-top: 0.8em; gap: 0.35em; } .taegeuk { width: 2.2em; height: 2.2em; } }

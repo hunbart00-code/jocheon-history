@@ -151,6 +151,7 @@ const btn = (id, fn) => $(id).addEventListener('click', () => { unlockAudio(); s
 btn('btnQuiz', UI.openQuizMenu);
 btn('btnBuild', () => UI.openShop('b'));
 btn('btnHeroes', () => UI.openHeroes('h'));
+btn('btnRelics', () => UI.openHeroes(G.s.era >= 3 ? 'dig' : 'book'));
 btn('btnFriends', UI.openFriends);
 btn('btnSettings', UI.openSettings);
 btn('btnLab', UI.openLab);
@@ -299,11 +300,12 @@ function applySkins() {
   // 9분할(border-image): 모서리 장식은 그대로 두고 가운데만 늘려요
   const nine = (k, sel, bw) => have.has(k) ? `${sel}{border:0 solid transparent !important;border-image:${u(k)} 30% 16% fill / ${bw} stretch !important;background:none !important;box-shadow:0 .35em .45em rgba(0,0,0,.32) !important}${sel.split(',').map(x => x + '::after').join(',')}{display:none !important}` : '';
   let css = '';
-  css += nine('btn_red', '.big.red', '1.9em 2.1em') + nine('btn_blue', '#btnBuild', '1.9em 2.1em') + nine(have.has('btn_teal') ? 'btn_teal' : 'btn_blue', '#btnHeroes', '1.9em 2.1em') + nine('btn_green', '.big.green', '1.9em 2.1em');
+  css += nine('btn_red', '.big.red', '1.9em 2.1em') + nine('btn_blue', '#btnBuild', '1.9em 2.1em') + nine(have.has('btn_teal') ? 'btn_teal' : 'btn_blue', '#btnRelics', '1.9em 2.1em') + nine(have.has('btn_gold') ? 'btn_gold' : 'btn_blue', '#btnHeroes', '1.9em 2.1em') + nine('btn_green', '.big.green', '1.9em 2.1em');
   // 가로 휴대폰은 버튼 높이가 낮아서 나무 테두리를 얇게 (글씨 들어갈 자리 넓히기)
-  if (have.has('btn_red')) css += '@media (max-height: 520px){.big.red,#btnBuild,#btnHeroes,.big.green{border-image-width:1.25em 1.5em !important}}';
+  // 버튼 높이에 맞춘 나무 테두리 두께 (큰 화면 / 가로 휴대폰)
+  if (have.has('btn_red')) css += '.bottom .big{border-image-width:1.45em 1.7em !important}@media (max-height: 520px){.bottom .big{border-image-width:1.15em 1.4em !important}}';
   css += nine('btn_gold', '.challenge', '.6em .72em');
-  css += nine('panel_wood', '.hud-top .panel,.g-title', '.58em .72em') + nine('panel_wood', '.tool .t-lb', '.36em .48em');
+  css += nine('panel_wood', '.hud-top .panel,.g-title', '.66em .8em') + nine('panel_wood', '.tool .t-lb', '.36em .48em');
   const tile = (k, sel) => have.has(k) ? `${sel}{background:${u(k)} center/100% 100% no-repeat !important;border:0 !important;border-radius:0 !important;box-shadow:0 .3em .45em rgba(0,0,0,.3) !important}` : '';
   css += tile('tile_cream', '.tool .t-ic') + tile('tile_blue', '.tool.chat .t-ic') + tile('tile_gold', '.tool.rank .t-ic');
   if (have.has('round_wood')) css += `.gear,.zoom button{background:${u('round_wood')} center/100% 100% no-repeat !important;border:0 !important;box-shadow:0 .2em .3em rgba(0,0,0,.35) !important}`;

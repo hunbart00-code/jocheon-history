@@ -49,7 +49,10 @@ export const AVATARS = [
 export const avatarURL = i => S.portraitURL(AVATARS[i % AVATARS.length], 64);
 
 // ---------- 기본 ----------
-export function initIcons() { document.querySelectorAll('img.ico[data-icon]').forEach(img => { img.src = S.iconURL(img.dataset.icon); }); }
+export function initIcons() {
+  document.querySelectorAll('img.ico[data-icon]').forEach(img => { img.src = S.iconURL(img.dataset.icon); });
+  document.querySelectorAll('img[data-hero]').forEach(img => { if (H[img.dataset.hero]) img.src = S.portraitURL(H[img.dataset.hero], 64); });
+}
 export function toast(msg, kind = '', ic = null) {
   if (!msg) return;
   const t = document.createElement('div'); t.className = 'toast ' + kind;
@@ -164,7 +167,7 @@ function goal() {
       if (s.gold < cost.gold) return [`엽전을 모아 ‘${b.name}’을(를) 지어요 (${F(s.gold)}/${F(cost.gold)})`, 'collect'];
       return [`‘${b.name}’을(를) 지을 수 있어요!`, 'shop'];
     }
-    if (c.type === 'heroes') return ['유물 & 위인에서 역사 위인을 영입해요', 'heroes'];
+    if (c.type === 'heroes') return ['위인에서 역사 위인을 영입해요', 'heroes'];
     if (c.type === 'mapSize') { const e = GM.nextExpand(); return [`영토를 ${c.size}×${c.size}로 넓혀요 (KP ${F(e?.kp || 0)}, 엽전 ${F(e?.gold || 0)})`, 'expand']; }
     if (c.type === 'relics') return [`유물을 발굴해 서로 다른 유물 ${c.need}종을 모아요 (${c.cur}/${c.need})`, 'dig'];
     if (c.type === 'techs') return [`역사 연구소에서 연구 ${c.need}종을 완료해요 (${c.cur}/${c.need})`, 'lab'];
@@ -302,7 +305,7 @@ export function refreshPanel() { if (panelUid) { const b = G.s.buildings.find(x 
 
 function heroChooser(b) {
   const s = G.s; const owned = Object.keys(s.heroes);
-  if (!owned.length) { toast('먼저 ‘유물 & 위인’에서 위인을 영입해요!', 'bad'); openHeroes('h'); return; }
+  if (!owned.length) { toast('먼저 ‘위인’에서 위인을 영입해요!', 'bad'); openHeroes('h'); return; }
   const rows = owned.map(id => { const h = H[id]; const at = GM.heroAt(id); const fav = h.fav === b.type;
     return `<div class="card" style="flex-direction:row;align-items:center"><img src="${S.portraitURL(h, 64)}" style="width:3.4em;height:3.4em;image-rendering:pixelated;border-radius:.5em" alt="">
       <div style="flex:1"><h5>${h.name}${fav ? ' <span class="syn-tag">찰떡 건물 +0.5배</span>' : ''}</h5><div class="sub">${h.passive.text}${at ? ` · 지금: ${B[at.type].name}` : ''}</div></div>
@@ -314,7 +317,7 @@ function heroChooser(b) {
   });
 }
 
-// ---------- 유물 & 위인 ----------
+// ---------- 위인 / 유물 (따로 열려요) ----------
 export function openHeroes(tab = 'h') {
   const s = G.s; let body = '';
   if (tab === 'h') {
@@ -356,7 +359,8 @@ export function openHeroes(tab = 'h') {
       body += '</div>';
     }
   }
-  openModal(`${head('유물 & 위인', 'chest')}${tabs([['h', '역사 위인'], ['dig', '유물 발굴'], ['book', '유물 도감']], tab)}<div class="sh-body">${body}</div>`);
+  openModal(tab === 'h' ? `${head('역사 위인', 'people')}<div class="sh-body">${body}</div>`
+    : `${head('유물', 'chest')}${tabs([['dig', '유물 발굴'], ['book', '유물 도감']], tab)}<div class="sh-body">${body}</div>`);
   bindTabs(t => openHeroes(t));
   $('sheet').querySelectorAll('[data-recruit]').forEach(b => b.onclick = () => {
     const r = GM.recruitHero(b.dataset.recruit);
