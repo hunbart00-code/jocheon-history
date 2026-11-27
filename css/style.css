@@ -833,3 +833,16 @@ body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
 .ribbon { height: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.25em); padding-top: 1.2em; gap: 0.45em; }
 .taegeuk { width: 2.6em; height: 2.6em; }
 @media (max-height: 520px) { .ribbon { height: calc(var(--top) + var(--row) * 2 + var(--hgap) + 0.25em); padding-top: 0.8em; gap: 0.35em; } .taegeuk { width: 2.2em; height: 2.2em; } }
+/* 아래 버튼 6개 (퀴즈 · 건설 · 상점 · 유물 · 위인 · 친구 마을) */
+.big.purple { background: linear-gradient(180deg, #b57ae8, #8a46c8 55%, #62289a); box-shadow: inset 0 0.4em 0 rgba(255,255,255,0.18), 0 0.35em 0 #3a1460; }
+.bottom { gap: 0.7em; }
+.bottom .big { max-width: 15em; padding: 0 0.8em; }
+.bottom .big b { font-size: 1.32em; }
+@media (max-height: 520px) { .bottom { gap: 0.5em; } .bottom .big { padding: 0 0.6em; } .bottom .big b { font-size: 1.08em; } }
+/* 좁은 휴대폰: 아이콘·글씨를 조금 더 작게 */
+@media (max-width: 660px) {
+  .bottom { gap: 0.4em; }
+  .bottom .big { padding: 0 0.45em; gap: 0.3em; }
+  .bottom .big img.ico { width: 1.5em; height: 1.5em; }
+  .bottom .big b { font-size: 0.95em; letter-spacing: 0; }
+}

@@ -3,7 +3,7 @@
 //  아이소메트릭 좌표: P(u, v, z)  u,v = 타일 단위(-0.5~0.5), z = 높이(px)
 //  * 선생님이 직접 만든 그림(PNG)을 쓰고 싶으면 data-buildings.js 에 img: '파일경로' 를 넣으면 됩니다.
 // =============================================================
-import { getImage } from './images.js';
+import { getImage } from './images.js?v=202611271114';
 export const TW = 64, TH = 32;
 
 function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }

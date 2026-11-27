@@ -1,21 +1,21 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js';
-import * as GM from './game.js';
-import { G } from './game.js';
-import * as S from './sprites.js';
-import { VERSION } from './mode.js';
-import * as Q from './quiz.js';
-import { sfx, setBgm, setSfx } from './audio.js';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js';
-import { HEROES, H } from './data-heroes.js';
-import { TECHS, T } from './data-techs.js';
-import { RELICS, R, RARITY } from './data-relics.js';
-import { QZ } from './data-quizzes.js';
-import { sync } from './sync.js';
-import { Renderer } from './render.js';
+import * as E from './economy.js?v=202611271114';
+import * as GM from './game.js?v=202611271114';
+import { G } from './game.js?v=202611271114';
+import * as S from './sprites.js?v=202611271114';
+import { VERSION } from './mode.js?v=202611271114';
+import * as Q from './quiz.js?v=202611271114';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271114';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271114';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271114';
+import { HEROES, H } from './data-heroes.js?v=202611271114';
+import { TECHS, T } from './data-techs.js?v=202611271114';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271114';
+import { QZ } from './data-quizzes.js?v=202611271114';
+import { sync } from './sync.js?v=202611271114';
+import { Renderer } from './render.js?v=202611271114';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -151,7 +151,7 @@ export function updateHud(force = false) {
 function goal() {
   const s = G.s;
   if (s.completed) return ['모든 시대 완성! 끝없는 연구와 퀴즈로 명성을 올려 보세요', 'quiz'];
-  if (!s.buildings.length) return ['건설/상점에서 첫 건물 ‘움집’을 지어 보세요!', 'shop'];
+  if (!s.buildings.length) return ['건설에서 첫 건물 ‘움집’을 지어 보세요!', 'shop'];
   if (s.storage > G.cap * 0.5 && s.stats.solved < 30) return ['건물 위 엽전을 눌러 창고의 엽전을 거두세요!', 'collect'];
   const cs = E.conditions(s);
   for (const c of cs) {
@@ -186,7 +186,7 @@ export function goalClick() {
   ({ quiz: openQuizMenu, shop: () => openShop('b'), heroes: () => openHeroes('h'), expand: () => openShop('e'), dig: () => openHeroes('dig'), lab: openLab, conds: openConds, wonder: openWonder, challenge: openConds, collect: () => ctx.collect?.() })[goalAct]?.();
 }
 
-// ---------- 건설 / 상점 ----------
+// ---------- 건설(건물·영토) / 상점(꾸미기) — 따로 열려요 ----------
 export function openShop(tab = 'b') {
   const s = G.s;
   let body = '';
@@ -235,7 +235,8 @@ export function openShop(tab = 'b') {
       <h4>${icon('star')} 배치 시너지</h4><p class="muted">역사적으로 관련 있는 건물을 상하좌우로 붙이면 두 건물 모두 수익이 +${Math.round(E.synergyRate(s, G.mods) * 100)}% 늘어요. 건물 옮기기는 무료!</p>
       <div class="list">${SYNERGIES.map(x => `<div><span>${B[x.a].name} + ${B[x.b].name}</span><span class="syn-tag">${x.name}${G.syn.active.has(x.id) ? ' ✓' : ''}</span></div>`).join('')}</div>`;
   }
-  openModal(`${head('건설 / 상점', 'hammer')}${tabs([['b', '건물'], ['d', '꾸미기'], ['e', '영토 · 시너지']], tab)}<div class="sh-body">${body}</div>`, '', () => { ctx.pendingTile = null; if (ctx.renderer && !ctx.renderer.selected?.uid) ctx.renderer.selected = null; });
+  openModal(tab === 'd' ? `${head('상점 · 꾸미기', 'coin')}<div class="sh-body">${body}</div>`
+    : `${head('건설', 'hammer')}${tabs([['b', '건물'], ['e', '영토 · 시너지']], tab)}<div class="sh-body">${body}</div>`, '', () => { ctx.pendingTile = null; if (ctx.renderer && !ctx.renderer.selected?.uid) ctx.renderer.selected = null; });
   bindTabs(t => { const keep = ctx.pendingTile; modalOnClose = null; openShop(t); ctx.pendingTile = keep; });
   $('sheet').querySelectorAll('[data-build]').forEach(btn => btn.onclick = () => {
     const type = btn.dataset.build; const chk = GM.buildCheck(type);

@@ -2,14 +2,14 @@
 //  게임 상태 & 행동 — 저장, 수익, 건설, 퀴즈 보상, 시대 돌파 ...
 //  (3차 Firebase 연동 때는 save() 안에서 sync.push(state, reason) 만 추가하면 됩니다)
 // =============================================================
-import * as E from './economy.js';
-import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js';
-import { B, D, WONDER } from './data-buildings.js';
-import { H } from './data-heroes.js';
-import { T } from './data-techs.js';
-import { R, RELICS } from './data-relics.js';
-import { sync } from './sync.js';
-import { TEACHER_MODE, INF } from './mode.js';
+import * as E from './economy.js?v=202611271114';
+import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js?v=202611271114';
+import { B, D, WONDER } from './data-buildings.js?v=202611271114';
+import { H } from './data-heroes.js?v=202611271114';
+import { T } from './data-techs.js?v=202611271114';
+import { R, RELICS } from './data-relics.js?v=202611271114';
+import { sync } from './sync.js?v=202611271114';
+import { TEACHER_MODE, INF } from './mode.js?v=202611271114';
 
 export const SAVE_KEY = TEACHER_MODE ? 'historyBuilder.teacher' : 'historyBuilder.v1';
 export const G = { s: null, mods: null, syn: null, inc: 0, cap: 100, ls: {} };

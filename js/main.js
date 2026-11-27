@@ -1,21 +1,21 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js';
-import { G } from './game.js';
-import * as UI from './ui.js';
-import { ctx } from './ui.js';
-import { Renderer } from './render.js';
-import * as S from './sprites.js';
-import * as E from './economy.js';
-import { B, D } from './data-buildings.js';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js';
-import { sync } from './sync.js';
-import { preloadImages, uiImages } from './images.js';
-import { initSocial } from './social.js';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js';
-import * as Title from './title.js';
-import * as FS from './fullscreen.js';
+import * as GM from './game.js?v=202611271114';
+import { G } from './game.js?v=202611271114';
+import * as UI from './ui.js?v=202611271114';
+import { ctx } from './ui.js?v=202611271114';
+import { Renderer } from './render.js?v=202611271114';
+import * as S from './sprites.js?v=202611271114';
+import * as E from './economy.js?v=202611271114';
+import { B, D } from './data-buildings.js?v=202611271114';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271114';
+import { sync } from './sync.js?v=202611271114';
+import { preloadImages, uiImages } from './images.js?v=202611271114';
+import { initSocial } from './social.js?v=202611271114';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271114';
+import * as Title from './title.js?v=202611271114';
+import * as FS from './fullscreen.js?v=202611271114';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -150,6 +150,7 @@ document.addEventListener('keydown', e => {
 const btn = (id, fn) => $(id).addEventListener('click', () => { unlockAudio(); sfx('click'); fn(); });
 btn('btnQuiz', UI.openQuizMenu);
 btn('btnBuild', () => UI.openShop('b'));
+btn('btnShop', () => UI.openShop('d'));
 btn('btnHeroes', () => UI.openHeroes('h'));
 btn('btnRelics', () => UI.openHeroes(G.s.era >= 3 ? 'dig' : 'book'));
 btn('btnFriends', UI.openFriends);
@@ -300,10 +301,10 @@ function applySkins() {
   // 9분할(border-image): 모서리 장식은 그대로 두고 가운데만 늘려요
   const nine = (k, sel, bw) => have.has(k) ? `${sel}{border:0 solid transparent !important;border-image:${u(k)} 30% 16% fill / ${bw} stretch !important;background:none !important;box-shadow:0 .35em .45em rgba(0,0,0,.32) !important}${sel.split(',').map(x => x + '::after').join(',')}{display:none !important}` : '';
   let css = '';
-  css += nine('btn_red', '.big.red', '1.9em 2.1em') + nine('btn_blue', '#btnBuild', '1.9em 2.1em') + nine(have.has('btn_teal') ? 'btn_teal' : 'btn_blue', '#btnRelics', '1.9em 2.1em') + nine(have.has('btn_gold') ? 'btn_gold' : 'btn_blue', '#btnHeroes', '1.9em 2.1em') + nine('btn_green', '.big.green', '1.9em 2.1em');
+  css += nine('btn_red', '.big.red', '1.9em 2.1em') + nine('btn_blue', '#btnBuild', '1.9em 2.1em') + nine(have.has('btn_teal') ? 'btn_teal' : 'btn_blue', '#btnRelics', '1.9em 2.1em') + nine(have.has('btn_gold') ? 'btn_gold' : 'btn_blue', '#btnHeroes', '1.9em 2.1em') + nine('btn_green', '.big.green', '1.9em 2.1em') + nine(have.has('btn_purple') ? 'btn_purple' : 'btn_blue', '#btnShop', '1.9em 2.1em');
   // 가로 휴대폰은 버튼 높이가 낮아서 나무 테두리를 얇게 (글씨 들어갈 자리 넓히기)
   // 버튼 높이에 맞춘 나무 테두리 두께 (큰 화면 / 가로 휴대폰)
-  if (have.has('btn_red')) css += '.bottom .big{border-image-width:1.45em 1.7em !important}@media (max-height: 520px){.bottom .big{border-image-width:1.15em 1.4em !important}}';
+  if (have.has('btn_red')) css += '#app .bottom .big{border-image-width:1.45em 1.7em !important}@media (max-height: 520px){#app .bottom .big{border-image-width:1.15em 1.4em !important}}';
   css += nine('btn_gold', '.challenge', '.6em .72em');
   css += nine('panel_wood', '.hud-top .panel,.g-title', '.66em .8em') + nine('panel_wood', '.tool .t-lb', '.36em .48em');
   const tile = (k, sel) => have.has(k) ? `${sel}{background:${u(k)} center/100% 100% no-repeat !important;border:0 !important;border-radius:0 !important;box-shadow:0 .3em .45em rgba(0,0,0,.3) !important}` : '';
