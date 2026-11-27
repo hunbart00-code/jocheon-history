@@ -1,22 +1,22 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271311';
-import { G } from './game.js?v=202611271311';
-import * as UI from './ui.js?v=202611271311';
-import { ctx } from './ui.js?v=202611271311';
-import { Renderer } from './render.js?v=202611271311';
-import * as S from './sprites.js?v=202611271311';
-import * as E from './economy.js?v=202611271311';
-import { B, D } from './data-buildings.js?v=202611271311';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271311';
-import { sync } from './sync.js?v=202611271311';
-import { preloadImages, uiImages } from './images.js?v=202611271311';
-import { initSocial } from './social.js?v=202611271311';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271311';
-import * as Title from './title.js?v=202611271311';
-import * as FS from './fullscreen.js?v=202611271311';
-import { startRoom } from './room.js?v=202611271311';
+import * as GM from './game.js?v=202611271314';
+import { G } from './game.js?v=202611271314';
+import * as UI from './ui.js?v=202611271314';
+import { ctx } from './ui.js?v=202611271314';
+import { Renderer } from './render.js?v=202611271314';
+import * as S from './sprites.js?v=202611271314';
+import * as E from './economy.js?v=202611271314';
+import { B, D } from './data-buildings.js?v=202611271314';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271314';
+import { sync } from './sync.js?v=202611271314';
+import { preloadImages, uiImages } from './images.js?v=202611271314';
+import { initSocial } from './social.js?v=202611271314';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271314';
+import * as Title from './title.js?v=202611271314';
+import * as FS from './fullscreen.js?v=202611271314';
+import { startRoom } from './room.js?v=202611271314';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');

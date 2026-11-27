@@ -4,17 +4,20 @@
 //  · 마을 주인은 내 마을에서 놀러 온 친구들을 볼 수 있어요 (host 모드)
 //  · 위치는 1초에 한 번쯤만 보내요 (무료 서버 사용량 아끼기)
 // =============================================================
-import * as S from './sprites.js?v=202611271311';
-import { tileToWorld } from './render.js?v=202611271311';
-import { activeOffset, occupancy } from './economy.js?v=202611271311';
-import { B } from './data-buildings.js?v=202611271311';
-import { sync } from './sync.js?v=202611271311';
-import { badWord } from './badwords.js?v=202611271311';
+import * as S from './sprites.js?v=202611271314';
+import { tileToWorld } from './render.js?v=202611271314';
+import { activeOffset, occupancy } from './economy.js?v=202611271314';
+import { B } from './data-buildings.js?v=202611271314';
+import { sync } from './sync.js?v=202611271314';
+import { badWord } from './badwords.js?v=202611271314';
 
 const SPEED = 2.4;            // 내 캐릭터 걷는 빠르기 (칸/초)
-const SEND_EVERY = 1000;      // 움직이는 동안 위치 보내는 간격
-const BEAT = 15000;           // 가만히 있어도 ‘여기 있어요’ 알리는 간격
-const STALE = 45000;          // 이만큼 소식이 없으면 나간 걸로 봐요
+// 무료 서버(하루 읽기 5만·쓰기 2만) 한도를 넘지 않게 아껴서 보내요
+const SEND_EVERY = 2000;      // 움직이는 동안 위치 보내는 간격
+const SLOW_EVERY = 8000;      // 오늘 많이 보냈으면 이 간격으로
+const DAILY_CAP = 400;        // 하루에 자주 보내는 횟수
+const BEAT = 25000;           // 가만히 있어도 ‘여기 있어요’ 알리는 간격
+const STALE = 70000;          // 이만큼 소식이 없으면 나간 걸로 봐요
 const BUBBLE = 6500;          // 말풍선 보이는 시간
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const KEYS = { ArrowUp: 'u', ArrowDown: 'd', ArrowLeft: 'l', ArrowRight: 'r', w: 'u', s: 'd', a: 'l', d: 'r', W: 'u', S: 'd', A: 'l', D: 'r' };
@@ -34,6 +37,9 @@ export function startRoom(opt) {
   const others = new Map();          // id → 아바타
   let me = null, keys = new Set(), lastSent = 0, sentX = null, sentY = null, beatT = 0, unsub = null, alive = true;
 
+  // 오늘 보낸 횟수 (기기에 기록)
+  const dayKey = 'hb.roomWrites.' + new Date().toDateString();
+  let sentToday = 0; try { sentToday = Number(localStorage.getItem(dayKey) || 0); } catch (e) {}
   // ---------- 내 캐릭터 ----------
   if (meInfo) {
     let best = null;
@@ -48,7 +54,11 @@ export function startRoom(opt) {
     sentX = me.i; sentY = me.j; lastSent = Date.now();
   }
   function r2(v) { return Math.round(v * 100) / 100; }
-  function put(data) { if (!meInfo || !alive) return; sync.roomPut(vid, data).catch(e => console.warn('room', e)); }
+  function put(data) {
+    if (!meInfo || !alive) return;
+    sentToday++; try { localStorage.setItem(dayKey, String(sentToday)); } catch (e) {}
+    sync.roomPut(vid, data).catch(e => console.warn('room', e));
+  }
 
   // ---------- 다른 친구들 ----------
   unsub = sync.roomWatch(vid, list => {
@@ -92,8 +102,9 @@ export function startRoom(opt) {
         else if (inside(me.i, nj) && !blocked(me.i, nj)) me.j = nj;
         me.flip = (di - dj) < 0;
       }
-      const moved = sentX == null || Math.hypot(me.i - sentX, me.j - sentY) > 0.05;
-      if (moved && (now - lastSent > SEND_EVERY || (!me.moving && now - lastSent > 250))) {
+      const moved = sentX == null || Math.hypot(me.i - sentX, me.j - sentY) > 0.15;
+      const every = sentToday > DAILY_CAP ? SLOW_EVERY : SEND_EVERY;
+      if (moved && (now - lastSent > every || (!me.moving && now - lastSent > Math.min(every, 900)))) {
         put({ x: r2(me.i), y: r2(me.j) }); sentX = me.i; sentY = me.j; lastSent = now; beatT = now;
       }
       if (now - beatT > BEAT) { put({}); beatT = now; }
@@ -101,7 +112,7 @@ export function startRoom(opt) {
     for (const a of others.values()) {
       if (a.ti == null) continue;
       const dx = a.ti - a.i, dy = a.tj - a.j, d = Math.hypot(dx, dy);
-      if (d > 4) { a.i = a.ti; a.j = a.tj; a.moving = false; continue; }   // 너무 멀면 순간 이동
+      if (d > 9) { a.i = a.ti; a.j = a.tj; a.moving = false; continue; }   // 너무 멀면 순간 이동
       const sp = Math.max(SPEED, d * 2.5) * dt;
       if (d <= sp) { a.i = a.ti; a.j = a.tj; a.moving = false; }
       else { a.i += dx / d * sp; a.j += dy / d * sp; a.moving = true; a.flip = (dx - dy) < 0; }

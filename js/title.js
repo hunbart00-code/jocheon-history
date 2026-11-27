@@ -3,8 +3,8 @@
 //  섬 왼쪽(선사)에서 오른쪽(외계)으로 시대가 흘러요. 길을 걷는 주민은 걸어가며 옷이 바뀌고
 //  마지막엔 별의 문으로 들어가요. 그림은 게임 안 건물·주민 그림을 밤 색으로 물들여 써요.
 // =============================================================
-import * as S from './sprites.js?v=202611271311';
-import { getImage } from './images.js?v=202611271311';
+import * as S from './sprites.js?v=202611271314';
+import { getImage } from './images.js?v=202611271314';
 
 const N = 5;
 const PAST = 'warm', NOW = 'cool', SPACE = 'cool', ALIEN = 'alien';

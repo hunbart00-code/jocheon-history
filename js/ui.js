@@ -1,22 +1,22 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271311';
-import * as GM from './game.js?v=202611271311';
-import { G } from './game.js?v=202611271311';
-import * as S from './sprites.js?v=202611271311';
-import { VERSION } from './mode.js?v=202611271311';
-import * as Q from './quiz.js?v=202611271311';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271311';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271311';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271311';
-import { HEROES, H } from './data-heroes.js?v=202611271311';
-import { TECHS, T } from './data-techs.js?v=202611271311';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271311';
-import { QZ } from './data-quizzes.js?v=202611271311';
-import { sync } from './sync.js?v=202611271311';
-import { Renderer } from './render.js?v=202611271311';
-import { startRoom } from './room.js?v=202611271311';
+import * as E from './economy.js?v=202611271314';
+import * as GM from './game.js?v=202611271314';
+import { G } from './game.js?v=202611271314';
+import * as S from './sprites.js?v=202611271314';
+import { VERSION } from './mode.js?v=202611271314';
+import * as Q from './quiz.js?v=202611271314';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271314';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271314';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271314';
+import { HEROES, H } from './data-heroes.js?v=202611271314';
+import { TECHS, T } from './data-techs.js?v=202611271314';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271314';
+import { QZ } from './data-quizzes.js?v=202611271314';
+import { sync } from './sync.js?v=202611271314';
+import { Renderer } from './render.js?v=202611271314';
+import { startRoom } from './room.js?v=202611271314';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
