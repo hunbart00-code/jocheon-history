@@ -3,7 +3,7 @@
 //  아이소메트릭 좌표: P(u, v, z)  u,v = 타일 단위(-0.5~0.5), z = 높이(px)
 //  * 선생님이 직접 만든 그림(PNG)을 쓰고 싶으면 data-buildings.js 에 img: '파일경로' 를 넣으면 됩니다.
 // =============================================================
-import { getImage } from './images.js?v=202611271314';
+import { getImage } from './images.js?v=202611271341';
 export const TW = 64, TH = 32;
 
 function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -988,6 +988,23 @@ export function personSprite(i, frame, era = 1) {
   if (im) return bobbed(uprightSprite(`pi${era}_${i % 6}`, im, 28), frame);
   const list = ERA_PEOPLE[era]; const k = i % list.length;
   return makeSprite(`pe${era}_${k}_${frame}`, 16, 26, 8, 25, a => drawPerson(a, list[k], frame));
+}
+// 걷는 모습용 뼈대: 그림에서 ‘다리가 시작하는 높이’와 ‘두 발 사이(가운데)’를 한 번만 찾아 둬요
+export function rigOf(spr) {
+  if (spr.rig) return spr.rig;
+  let leg = 0.76, split = 0.5;
+  try {
+    const c = spr.img, W = c.width, H = c.height, d = c.getContext('2d').getImageData(0, 0, W, H).data;
+    let top = -1, bot = -1;
+    for (let y = 0; y < H; y++) { let any = false; for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 60) { any = true; break; } if (any) { if (top < 0) top = y; bot = y; } }
+    if (top >= 0 && bot > top) {
+      const hgt = bot - top; leg = (top + hgt * 0.75) / H;
+      let sx = 0, n = 0;
+      for (let y = Math.round(bot - hgt * 0.1); y <= bot; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 60) { sx += x; n++; }
+      if (n) split = Math.max(0.38, Math.min(0.62, sx / n / W));
+    }
+  } catch (e) { /* 그림을 읽을 수 없으면 기본값 */ }
+  return (spr.rig = { leg, split });
 }
 // 병사: side 'me' 파랑 띠, 'foe' 빨강 띠
 export function soldierSprite(era, side, frame) {

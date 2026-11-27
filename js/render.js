@@ -1,11 +1,11 @@
 // =============================================================
 //  아이소메트릭 마을 렌더러 (캔버스) — 카메라·확대·클릭 판정·애니메이션
 // =============================================================
-import * as S from './sprites.js?v=202611271314';
-import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271314';
-import { B, D } from './data-buildings.js?v=202611271314';
-import { H } from './data-heroes.js?v=202611271314';
-import { ERAS } from './data-config.js?v=202611271314';
+import * as S from './sprites.js?v=202611271341';
+import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271341';
+import { B, D } from './data-buildings.js?v=202611271341';
+import { H } from './data-heroes.js?v=202611271341';
+import { ERAS } from './data-config.js?v=202611271341';
 
 const ISL0 = -4, ISL1 = GRID + 3;   // 섬 범위 (타일)
 const tierOf = lv => lv >= 10 ? 2 : lv >= 5 ? 1 : 0;
@@ -18,6 +18,7 @@ export class Renderer {
     this.cam = { x: 0, y: (GRID - 1) * H2, s: 2 };
     this.userZoom = 0;
     this.people = []; this.fx = []; this.scenery = []; this.sceneryKey = ''; this.avatars = [];
+    this.items = []; this.groundFx = null; this.overFx = null;   // 친구 마을 함께 놀기: 보물, OX 바닥, OX 글자
     this.hover = null; this.mode = null; this.selected = null; this.ghost = null;
     this.coinBoxes = []; this.crisisBox = null;
     this.t = 0; this.dpr = 1;
@@ -126,8 +127,9 @@ export class Renderer {
       }
       const dx = p.ti - p.i, dy = p.tj - p.j, d = Math.hypot(dx, dy), sp = 0.55 * dt;
       if (d < sp) { p.i = p.ti; p.j = p.tj; p.ti = null; p.wait = 1 + Math.random() * 4; }
-      else { p.i += dx / d * sp; p.j += dy / d * sp; p.flip = (dx - dy) < 0; }
+      else { p.i += dx / d * sp; p.j += dy / d * sp; p.flip = (dx - dy) < 0; p.ph = (p.ph || 0) + sp * (Math.PI * 2 / 0.5); }
     }
+    for (const p of this.people) p.amp = (p.amp || 0) + ((p.ti != null && p.wait <= 0 ? 1 : 0) - (p.amp || 0)) * (1 - Math.exp(-dt * 8));
   }
   addFx(fx) { this.fx.push({ ...fx, t: 0 }); }
   // 위인이 배치된 건물: 둥근 금테 배지 (초상 그림의 투명한 바탕이 검게 보이지 않도록 크림색 원 안에 그려요)
@@ -197,6 +199,7 @@ export class Renderer {
     }
     // 활성 구역 테두리
     this.drawActiveBorder(g, state, !!this.mode);
+    if (this.groundFx) this.groundFx(g, this);
     // 배치/이동 모드: 가능한 칸 표시
     if (this.mode) this.drawPlacement(g, state, occ);
     if (this.selected) { const b = this.selected; this.diamond(g, b.x, b.y, b.size || 1, 'rgba(255,230,90,' + (0.35 + 0.25 * Math.sin(this.t * 6)) + ')', '#ffe066'); }
@@ -211,24 +214,27 @@ export class Renderer {
     }
     if (state.wonder) objs.push({ d: state.wonder.x + state.wonder.y + 2, i: state.wonder.x + 0.5, j: state.wonder.y + 0.5, spr: S.wonderSprite(state.wonderStage), aura: state.wonderStage >= 5 });
     for (const p of this.people) {
-      const fr = p.ti != null ? Math.floor(this.t * 6 + p.k) % 2 : 0;
-      objs.push({ d: p.i + p.j + 0.02, i: p.i, j: p.j, spr: S.personSprite(p.k, fr, state.era || 1), flip: p.flip });
+      objs.push({ d: p.i + p.j + 0.02, i: p.i, j: p.j, spr: S.personSprite(p.k, 0, state.era || 1), flip: p.flip, walk: { ph: p.ph || 0, amp: p.amp || 0, seed: p.k } });
     }
     // 친구 마을에 놀러 온 친구들 · 내 캐릭터 (방향키로 움직여요)
     for (const a of this.avatars || []) {
-      const fr = a.moving ? Math.floor(this.t * 7) % 2 : 0;
-      objs.push({ d: a.i + a.j + 0.03, i: a.i, j: a.j, spr: S.personSprite(a.k, fr, a.era || 1), flip: a.flip, ring: a.me ? '#ffe14a' : '#ffffff' });
+      objs.push({ d: a.i + a.j + 0.03, i: a.i, j: a.j, spr: S.personSprite(a.k, 0, a.era || 1), flip: a.flipOv ?? a.flip, ring: a.me ? '#ffe14a' : '#ffffff',
+        walk: { ph: a.ph || 0, amp: a.amp || 0, jump: a.jump || 0, tilt: a.tilt || 0, squash: a.squash || 0, seed: a.k + 3 } });
     }
+    // 보물 (엽전 꾸러미·보물 상자)
+    for (const it of this.items || []) objs.push({ d: it.i + it.j + 0.015, i: it.i, j: it.j, item: it });
     // 고스트(배치 미리보기)
     if (this.ghost && this.hover) objs.push({ d: this.hover.x + this.hover.y + 0.5, i: this.hover.x + (this.ghost.size === 2 ? 0.5 : 0), j: this.hover.y + (this.ghost.size === 2 ? 0.5 : 0), spr: this.ghost.spr, alpha: this.ghost.ok ? 0.75 : 0.35 });
     objs.sort((a, b) => a.d - b.d || a.i - b.i);
     for (const o of objs) {
       const [X, Y] = tileToWorld(o.i, o.j);
+      if (o.item) { this.drawItem(g, o.item, X, Y); continue; }
       if (o.aura) {
         g.save(); g.globalAlpha = 0.35 + 0.15 * Math.sin(this.t * 3 + o.i);
         g.fillStyle = '#ffe27a'; g.beginPath(); g.ellipse(X, Y, 30, 14, 0, 0, Math.PI * 2); g.fill(); g.restore();
       }
       if (o.ring) { g.save(); g.globalAlpha = 0.55; g.strokeStyle = o.ring; g.lineWidth = 1.5; g.beginPath(); g.ellipse(X, Y, 9, 4.5, 0, 0, Math.PI * 2); g.stroke(); g.restore(); }
+      if (o.walk) { this.drawWalker(g, o, X, Y); continue; }
       if (o.alpha) g.globalAlpha = o.alpha;
       if (o.broken) g.filter = 'grayscale(0.75) brightness(0.62) sepia(0.35)';
       if (o.flip) { g.save(); g.translate(X, 0); g.scale(-1, 1); g.drawImage(o.spr.img, -o.spr.ox, Y - o.spr.oy, o.spr.w, o.spr.h); g.restore(); }
@@ -261,10 +267,15 @@ export class Renderer {
       const [X, Y] = tileToWorld(f.i, f.j); const p = f.t / (f.life || 1);
       if (f.kind === 'dust') {
         for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; g.fillStyle = `rgba(240,230,210,${1 - p})`; g.fillRect(X + Math.cos(a) * 30 * p, Y + Math.sin(a) * 15 * p - 6, 3, 3); }
+      } else if (f.kind === 'step') {
+        // 발걸음 먼지: 작은 흙먼지 두세 알갱이
+        for (let k = 0; k < 3; k++) { g.fillStyle = `rgba(235,225,200,${0.7 * (1 - p)})`; const r = 1.2 + p * 2.2; g.beginPath(); g.ellipse(X + (k - 1) * (3 + p * 5), Y - 1 - p * 3 - (k % 2) * 1.5, r, r * 0.7, 0, 0, Math.PI * 2); g.fill(); }
       } else if (f.kind === 'stars') {
         for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; g.fillStyle = k % 2 ? `rgba(255,220,80,${1 - p})` : `rgba(255,255,255,${1 - p})`; g.fillRect(X + Math.cos(a) * 40 * p, Y - 30 + Math.sin(a) * 30 * p - 20 * p, 3, 3); }
       }
     }
+
+    if (this.overFx) this.overFx(g, this);
 
     // --- 화면 좌표 오버레이: 동전, 위기, 위인 배지 ---
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
@@ -301,6 +312,51 @@ export class Renderer {
         for (let k = 0; k < 5; k++) { const ph = (this.t * 1.5 + k / 5) % 1; g.fillStyle = `rgba(255,${120 + k * 20},40,${1 - ph})`; g.fillRect(fx - 20 + k * 9, fy - ph * 40, 5, 5); }
       }
     }
+  }
+  // 걷는 모습: 그림 한 장을 몸과 두 다리로 나눠서, 걸음마다 발을 번갈아 들고 몸은 통통·기우뚱해요
+  // walk = { ph: 걸음 위치(라디안, 2π = 두 걸음), amp: 걷는 정도 0~1, jump, tilt, squash: 감정 표현용 }
+  drawWalker(g, o, X, Y) {
+    const spr = o.spr, w = o.walk, img = spr.img, rig = S.rigOf(spr);
+    const k = img.width / spr.w, big = spr.h >= 27 ? 1 : 0.7;
+    const amp = Math.max(0, Math.min(1, w.amp || 0)), sn = Math.sin(w.ph || 0), jump = Math.max(0, w.jump || 0);
+    const liftL = Math.max(0, sn) * 2 * amp * big, liftR = Math.max(0, -sn) * 2 * amp * big;
+    const bob = Math.abs(sn) * 1.5 * amp * big;
+    const breath = (1 - amp) * Math.sin(this.t * 2.3 + (w.seed || 0) * 1.7) * 0.016;
+    const sq = 1 + breath + (Math.abs(sn) - 0.5) * 0.05 * amp + (w.squash || 0);
+    const tilt = sn * 0.05 * amp + (w.tilt || 0);
+    // 그림자 (뛰면 작아져요)
+    const sh = Math.max(0.45, 1 - jump / 18);
+    g.fillStyle = 'rgba(25,32,18,0.3)'; g.beginPath(); g.ellipse(X, Y, Math.max(3, spr.w * 0.34) * sh, Math.max(1.6, spr.w * 0.13) * sh, 0, 0, Math.PI * 2); g.fill();
+    const legPx = Math.max(1, Math.min(img.height - 1, Math.round(rig.leg * img.height))), spPx = Math.max(1, Math.min(img.width - 1, Math.round(rig.split * img.width)));
+    const ovPx = Math.min(legPx, Math.round(3 * k)), lh = img.height - legPx + ovPx;
+    const legY = legPx / k, sx = spPx / k, x0 = -spr.ox, y0 = -spr.oy;
+    g.save(); g.translate(X, Y - jump); if (o.flip) g.scale(-1, 1);
+    g.imageSmoothingEnabled = true;
+    // 두 다리 (몸 밑으로 조금 겹쳐 그려서 틈이 안 생겨요)
+    // 든 발은 앞으로 살짝, 디딘 발은 뒤로 살짝 (보는 쪽 = 그림의 오른쪽)
+    const fw = 0.55 * amp * big, swL = (liftL ? 1 : -0.5) * fw * Math.abs(sn), swR = (liftR ? 1 : -0.5) * fw * Math.abs(sn);
+    g.drawImage(img, 0, legPx - ovPx, spPx, lh, x0 + swL, y0 + (legPx - ovPx) / k - liftL, sx, lh / k);
+    g.drawImage(img, spPx, legPx - ovPx, img.width - spPx, lh, x0 + sx + swR, y0 + (legPx - ovPx) / k - liftR, spr.w - sx, lh / k);
+    // 몸 (엉덩이를 축으로)
+    g.translate(x0 + sx, y0 + legY - bob); g.rotate(tilt); g.scale(1 / Math.sqrt(sq), sq);
+    g.drawImage(img, 0, 0, img.width, legPx, -sx, -legY, spr.w, legY);
+    g.restore(); g.imageSmoothingEnabled = false;
+  }
+  // 친구 마을 보물: 엽전 꾸러미 / 보물 상자 (둥실둥실 + 반짝)
+  drawItem(g, it, X, Y) {
+    const big = !!it.big, s = big ? 19 : 14, t = this.t, bob = Math.sin(t * 3 + it.i * 1.7 + it.j) * 2;
+    if (it.fade) g.globalAlpha = 0.35 + 0.65 * Math.abs(Math.sin(t * 9));
+    g.fillStyle = 'rgba(25,32,18,0.28)'; g.beginPath(); g.ellipse(X, Y, s * 0.42, s * 0.16, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = `rgba(255,230,110,${0.25 + 0.15 * Math.sin(t * 4 + it.i)})`; g.beginPath(); g.ellipse(X, Y - s * 0.55 + bob, s * 0.75, s * 0.6, 0, 0, Math.PI * 2); g.fill();
+    g.imageSmoothingEnabled = true;
+    g.drawImage(S.iconCanvas(big ? 'chest' : 'coin', 48), X - s / 2, Y - s - 3 + bob, s, s);
+    g.imageSmoothingEnabled = false;
+    for (let k = 0; k < 2; k++) {
+      const a = t * 2.2 + k * Math.PI, r = s * 0.6, tw = 0.5 + 0.5 * Math.sin(t * 7 + k * 2);
+      g.fillStyle = `rgba(255,255,255,${tw})`; const px = X + Math.cos(a) * r, py = Y - s * 0.55 + bob + Math.sin(a) * r * 0.55;
+      g.fillRect(px - 0.6, py - 2, 1.2, 4); g.fillRect(px - 2, py - 0.6, 4, 1.2);
+    }
+    g.globalAlpha = 1;
   }
   heart(g, x, y) { g.fillRect(x - 3, y - 2, 2, 2); g.fillRect(x + 1, y - 2, 2, 2); g.fillRect(x - 4, y - 1, 8, 2); g.fillRect(x - 3, y + 1, 6, 1); g.fillRect(x - 2, y + 2, 4, 1); g.fillRect(x - 1, y + 3, 2, 1); }
   diamond(g, x, y, size, fill, stroke) {

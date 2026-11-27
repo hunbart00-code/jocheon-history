@@ -128,6 +128,8 @@ export const BAL = {
   chat: { maxLen: 60, gapSec: 4, keep: 50 },
   // 협동 위기
   crisisEveryMin: 20, crisisDaily: 5, crisisKpQ: 3, crisisGoldSec: 60,
+  // 친구 마을 함께 놀기: OX 퀴즈 정답 KP는 하루 30문제까지, 보물은 하루 25개까지 (엽전 꾸러미 = 15초치 수익, 보물 상자는 3배)
+  oxDaily: 30, treasureDaily: 25, treasureSec: 15,
   // 대역사
   wonderIncomeBonus: 0.15,    // 단계당 전체 수익 +15%
   // 명성

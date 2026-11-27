@@ -897,3 +897,62 @@ body.title-on .world-notice { left: 0; right: calc(min(1vh, 0.62vw) * 13 + var(-
 .dpad .dp-u { left: 3.15em; top: 0; } .dpad .dp-d { left: 3.15em; bottom: 0; } .dpad .dp-l { left: 0; top: 3.15em; } .dpad .dp-r { right: 0; top: 3.15em; }
 @media (pointer: coarse) { .dpad { display: block; } .v-hint { display: none; } }
 @media (max-height: 520px) { .v-hint { top: 5.5em; font-size: 0.9em; } .dpad { bottom: 38%; transform: scale(0.85); transform-origin: left bottom; } }
+
+/* ===== 친구 마을 함께 놀기 2: 감정 표현 · OX 퀴즈 · 보물 (v1.9) ===== */
+.btn.purple { background: linear-gradient(180deg, #a26ae8, #6a36b0); box-shadow: 0 0.2em 0 #34175a; }
+.btn.purple.busy { filter: grayscale(0.4) brightness(0.9); }
+.ox-ic { display: inline-flex; align-items: center; justify-content: center; gap: 0.05em; font-family: 'Jua', sans-serif; font-size: 1.05em; line-height: 1; padding: 0.12em 0.3em; border-radius: 0.35em; background: #fff; color: #2f7fe8; text-shadow: none; }
+.ox-ic i { font-style: normal; color: #e8443a; }
+/* 머리 위 감정 표현 */
+.av-emo { display: block; font-style: normal; font-size: calc(var(--u) * 2.1); line-height: 1; margin-bottom: 0.1em; opacity: 0; transform: scale(0.3); filter: drop-shadow(0 0.08em 0 rgba(0,0,0,0.35)); }
+.av-emo.on { animation: emo-pop 2.6s cubic-bezier(.3,1.6,.5,1) forwards; }
+@keyframes emo-pop { 0% { opacity: 0; transform: translateY(0.4em) scale(0.3); } 12% { opacity: 1; transform: translateY(0) scale(1.15); } 20% { transform: scale(1); } 80% { opacity: 1; transform: translateY(-0.15em) scale(1); } 100% { opacity: 0; transform: translateY(-0.5em) scale(0.9); } }
+/* 감정 표현 버튼 (오른쪽 가운데 2×3) */
+.v-emo { position: absolute; right: calc(0.8em + var(--sr)); top: 50%; transform: translateY(-58%); z-index: 2; display: grid; grid-template-columns: repeat(2, 3.3em); gap: 0.4em; }
+.v-emo button { width: 3.3em; height: 3.3em; border-radius: 0.9em; background: rgba(255,250,238,0.92); border: 0.15em solid var(--woodD); box-shadow: 0 0.18em 0 var(--woodD); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.05em; color: var(--ink); overflow: hidden; }
+.v-emo button .em { font-size: 1.45em; line-height: 1; }
+.v-emo button small { font-family: 'Jua', sans-serif; font-size: 0.72em; line-height: 1; white-space: nowrap; color: #6a4a2a; }
+.v-emo button:active, .v-emo button.on { transform: translateY(0.12em) scale(0.95); box-shadow: none; background: #ffe9a8; }
+/* 남은 보상 */
+.v-stat { position: absolute; top: calc(0.9em + env(safe-area-inset-top)); right: calc(0.8em + var(--sr)); z-index: 2; font-family: 'Jua', sans-serif; font-size: 1em; color: #fff; background: rgba(20,22,34,0.6); padding: 0.3em 0.8em; border-radius: 999px; white-space: nowrap; pointer-events: none; }
+.v-stat b { color: #ffe07a; font-weight: normal; }
+/* 얻은 것 (위로 둥실) */
+.v-gains { position: absolute; left: 50%; bottom: 32%; transform: translateX(-50%); z-index: 4; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 0.3em; }
+.v-gain { display: inline-flex; align-items: center; gap: 0.35em; font-family: 'Jua', sans-serif; font-size: 1.35em; color: #fff; background: rgba(42,26,10,0.85); border: 0.12em solid #ffd84a; padding: 0.2em 0.8em 0.2em 0.4em; border-radius: 999px; white-space: nowrap; animation: gain-up 2.2s ease-out forwards; }
+.v-gain img.ico { width: 1.4em; height: 1.4em; }
+@keyframes gain-up { 0% { opacity: 0; transform: translateY(0.8em) scale(0.8); } 12% { opacity: 1; transform: translateY(0) scale(1.05); } 75% { opacity: 1; transform: translateY(-1.6em); } 100% { opacity: 0; transform: translateY(-2.4em); } }
+/* OX 문제 판 */
+.ox-panel { position: absolute; top: 4.9em; left: 50%; transform: translateX(-50%); z-index: 3; width: min(38em, calc(100vw - 19em)); background: rgba(255,250,238,0.96); color: var(--ink); border: 0.22em solid var(--woodD); border-radius: 1em; box-shadow: inset 0 0 0 0.16em var(--trim), 0 0.4em 0.8em rgba(0,0,0,0.35); padding: 0.5em 0.9em 0.55em; text-align: center; pointer-events: none; animation: rise 0.3s cubic-bezier(.3,1.5,.5,1); }
+.ox-top { display: flex; align-items: center; gap: 0.6em; justify-content: center; font-family: 'Jua', sans-serif; font-size: 1em; color: #6a4a2a; }
+.ox-badge { font-weight: normal; color: #fff; background: linear-gradient(180deg, #a26ae8, #6a36b0); padding: 0.1em 0.65em; border-radius: 999px; white-space: nowrap; }
+.ox-sec { min-width: 1.8em; height: 1.8em; display: inline-grid; place-items: center; border-radius: 50%; background: #2a1a10; color: #ffe07a; font-size: 1.1em; }
+.ox-sec:empty { display: none; }
+.ox-panel[data-phase="think"] .ox-sec { animation: pop 1s infinite; }
+.ox-q { margin: 0.3em 0 0.15em; font-family: 'Jua', sans-serif; font-size: 1.45em; line-height: 1.3; word-break: keep-all; overflow-wrap: anywhere; }
+.ox-q b.o, .ox-sub b.o { color: #2f7fe8; } .ox-q b.x, .ox-sub b.x { color: #e8443a; }
+.ox-q b { font-weight: normal; font-size: 1.15em; }
+.ox-exp { display: block; font-size: 0.72em; color: #5a4a3a; margin-top: 0.15em; }
+.ox-sub { margin: 0; font-family: 'Jua', sans-serif; font-size: 1.05em; color: #5a4a3a; min-height: 1.3em; }
+.ox-sub b { font-weight: normal; font-size: 1.2em; }
+.ox-panel[data-phase="think"][data-zone="mid"] .ox-sub { color: #c0392b; }
+/* OX 결과판 */
+.ox-result { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%); z-index: 5; width: min(24em, 86vw); max-height: 78%; overflow: auto; background: var(--paper); color: var(--ink); border: 0.25em solid var(--woodD); border-radius: 1em; box-shadow: inset 0 0 0 0.18em var(--trim), 0 0.6em 1.4em rgba(0,0,0,0.45); padding: 0.7em 1em 0.9em; text-align: center; animation: rise 0.3s cubic-bezier(.3,1.5,.5,1); }
+.ox-r-head { font-family: 'Jua', sans-serif; font-size: 1.5em; color: #6a36b0; margin-bottom: 0.3em; }
+.ox-result ol { list-style: none; margin: 0 0 0.4em; padding: 0; display: flex; flex-direction: column; gap: 0.25em; }
+.ox-result li { display: flex; align-items: center; gap: 0.5em; font-family: 'Jua', sans-serif; font-size: 1.15em; padding: 0.25em 0.6em; border-radius: 0.6em; background: rgba(255,255,255,0.7); }
+.ox-result li.me { background: #ffe9a8; box-shadow: inset 0 0 0 0.12em #e0a020; }
+.ox-result .rk { width: 1.6em; text-align: center; }
+.ox-result .nm { flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ox-result li b { font-weight: normal; color: #6a36b0; white-space: nowrap; }
+.ox-r-me { margin: 0.2em 0 0.6em; font-family: 'Jua', sans-serif; font-size: 1.05em; color: #5a4a3a; }
+/* 마을 주인: 같이 놀기 */
+.host-join { position: absolute; left: 50%; bottom: calc(var(--btnh, 5em) + 4.2em + var(--badge)); transform: translateX(-50%); z-index: 6; display: inline-flex; align-items: center; gap: 0.4em; font-family: 'Jua', sans-serif; font-size: 1.2em; color: #fff; background: linear-gradient(180deg, #5cb84e, var(--greenD)); border: 0.15em solid var(--woodD); border-radius: 999px; padding: 0.35em 1.1em 0.35em 0.7em; box-shadow: 0 0.2em 0 #17421a, 0 0.4em 0.8em rgba(0,0,0,0.3); white-space: nowrap; animation: join-bob 1.6s ease-in-out infinite; }
+.host-join b { font-weight: normal; font-size: 1.2em; }
+@keyframes join-bob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-0.25em); } }
+@media (max-height: 520px) {
+  .ox-panel { top: 4.3em; padding: 0.35em 0.8em 0.4em; width: min(36em, calc(100vw - 17em)); }
+  .ox-q { font-size: 1.25em; }
+  .v-emo { grid-template-columns: repeat(2, 2.9em); gap: 0.3em; transform: translateY(-62%); }
+  .v-emo button { width: 2.9em; height: 2.9em; }
+  .v-gains { bottom: 38%; }
+}

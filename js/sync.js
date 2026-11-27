@@ -6,7 +6,7 @@
 //   chats/{학급코드}/msgs/{자동}: 학급 채팅 (최근 50개만 구독)
 //  firebase-config.js 의 apiKey 가 비어 있으면 아무것도 하지 않습니다(로컬 모드).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271314';
+import { firebaseConfig } from './firebase-config.js?v=202611271341';
 
 const V = '10.12.2';
 const CDN = `https://www.gstatic.com/firebasejs/${V}/`;
@@ -205,7 +205,27 @@ export const sync = {
   get myUid() { return uid; },
   async roomPut(vid, data) {
     if (!this.enabled || !vid || !uid) return;
-    await F.setDoc(F.doc(db, 'visits', vid, 'people', uid), { ...data, uid, at: Date.now() }, { merge: true });
+    await F.setDoc(F.doc(db, 'visits', vid, 'people', uid), { ...data, uid, at: Date.now(), st: F.serverTimestamp() }, { merge: true });
+  },
+  srvOff: 0,          // 서버 시계 − 내 시계 (OX 퀴즈·보물 시간을 다 같이 맞춰요)
+  // OX 퀴즈 판 (누구든 시작할 수 있어요)
+  async roomGameSet(vid, g) {
+    if (!this.enabled || !vid) return;
+    await F.setDoc(F.doc(db, 'visits', vid, 'game', 'ox'), g);
+  },
+  roomGameWatch(vid, cb) {
+    if (!this.enabled || !vid) return () => {};
+    return F.onSnapshot(F.doc(db, 'visits', vid, 'game', 'ox'), snap => cb(snap.exists() ? snap.data() : null), e => console.warn('ox', e));
+  },
+  // 보물 줍기: 문서를 처음 만든 사람만 성공 (이미 있으면 보안 규칙이 막아요)
+  async roomPick(vid, key, slot, name) {
+    if (!this.enabled || !vid || !uid) throw new Error('off');
+    await F.setDoc(F.doc(db, 'visits', vid, 'picks', key), { uid, slot, name: String(name || '').slice(0, 8), at: Date.now() });
+  },
+  roomPicksWatch(vid, minSlot, cb) {
+    if (!this.enabled || !vid) return () => {};
+    const q = F.query(F.collection(db, 'visits', vid, 'picks'), F.where('slot', '>=', minSlot));
+    return F.onSnapshot(q, snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))), e => console.warn('picks', e));
   },
   async roomLeave(vid) {
     if (!this.enabled || !vid || !uid) return;

@@ -2,14 +2,14 @@
 //  게임 상태 & 행동 — 저장, 수익, 건설, 퀴즈 보상, 시대 돌파 ...
 //  (3차 Firebase 연동 때는 save() 안에서 sync.push(state, reason) 만 추가하면 됩니다)
 // =============================================================
-import * as E from './economy.js?v=202611271314';
-import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js?v=202611271314';
-import { B, D, WONDER } from './data-buildings.js?v=202611271314';
-import { H } from './data-heroes.js?v=202611271314';
-import { T } from './data-techs.js?v=202611271314';
-import { R, RELICS } from './data-relics.js?v=202611271314';
-import { sync } from './sync.js?v=202611271314';
-import { TEACHER_MODE, INF } from './mode.js?v=202611271314';
+import * as E from './economy.js?v=202611271341';
+import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js?v=202611271341';
+import { B, D, WONDER } from './data-buildings.js?v=202611271341';
+import { H } from './data-heroes.js?v=202611271341';
+import { T } from './data-techs.js?v=202611271341';
+import { R, RELICS } from './data-relics.js?v=202611271341';
+import { sync } from './sync.js?v=202611271341';
+import { TEACHER_MODE, INF } from './mode.js?v=202611271341';
 
 export const SAVE_KEY = TEACHER_MODE ? 'historyBuilder.teacher' : 'historyBuilder.v1';
 export const G = { s: null, mods: null, syn: null, inc: 0, cap: 100, ls: {} };
@@ -101,6 +101,25 @@ export function helpedFriend() {
   const kp = Math.round(E.baseKp(s, G.mods) * BAL.crisisKpQ * G.mods.crisisMult); s.kp += kp; save('crisis');
   return { kp };
 }
+// 친구 마을 OX 퀴즈 정답 (하루 BAL.oxDaily 문제까지 KP)
+export function oxReward(right) {
+  const s = G.s; dailyReset(); s.daily.ox ||= 0;
+  if (!right) return { kp: 0 };
+  if (s.daily.ox >= BAL.oxDaily) return { kp: 0, limit: true };
+  s.daily.ox++; const kp = Math.max(1, Math.round(E.baseKp(s, G.mods))); s.kp += kp; save('ox');
+  return { kp, left: BAL.oxDaily - s.daily.ox };
+}
+// 친구 마을 보물 줍기 (하루 BAL.treasureDaily 개까지 엽전)
+export const treasureLeft = () => { dailyReset(); return Math.max(0, BAL.treasureDaily - (G.s.daily.treasure || 0)); };
+export function treasureReward(big) {
+  const s = G.s; dailyReset(); s.daily.treasure ||= 0;
+  if (s.daily.treasure >= BAL.treasureDaily) return { gold: 0, limit: true };
+  s.daily.treasure++;
+  const gold = Math.max(big ? 90 : 30, Math.round((G.inc || 0) * BAL.treasureSec * (big ? 3 : 1)));
+  s.gold += gold; save('treasure');
+  return { gold, left: BAL.treasureDaily - s.daily.treasure };
+}
+export const oxLeft = () => { dailyReset(); return Math.max(0, BAL.oxDaily - (G.s.daily.ox || 0)); };
 export const dailyLeft = () => { dailyReset(); return { cheers: BAL.crisisDaily - G.s.daily.cheers, helps: BAL.crisisDaily - G.s.daily.crisisHelps }; };
 export function save(reason = 'auto') {
   if (!G.s) return;

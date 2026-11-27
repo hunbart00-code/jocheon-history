@@ -1,22 +1,22 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271314';
-import { G } from './game.js?v=202611271314';
-import * as UI from './ui.js?v=202611271314';
-import { ctx } from './ui.js?v=202611271314';
-import { Renderer } from './render.js?v=202611271314';
-import * as S from './sprites.js?v=202611271314';
-import * as E from './economy.js?v=202611271314';
-import { B, D } from './data-buildings.js?v=202611271314';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271314';
-import { sync } from './sync.js?v=202611271314';
-import { preloadImages, uiImages } from './images.js?v=202611271314';
-import { initSocial } from './social.js?v=202611271314';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271314';
-import * as Title from './title.js?v=202611271314';
-import * as FS from './fullscreen.js?v=202611271314';
-import { startRoom } from './room.js?v=202611271314';
+import * as GM from './game.js?v=202611271341';
+import { G } from './game.js?v=202611271341';
+import * as UI from './ui.js?v=202611271341';
+import { ctx } from './ui.js?v=202611271341';
+import { Renderer } from './render.js?v=202611271341';
+import * as S from './sprites.js?v=202611271341';
+import * as E from './economy.js?v=202611271341';
+import { B, D } from './data-buildings.js?v=202611271341';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271341';
+import { sync } from './sync.js?v=202611271341';
+import { preloadImages, uiImages } from './images.js?v=202611271341';
+import { initSocial } from './social.js?v=202611271341';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271341';
+import * as Title from './title.js?v=202611271341';
+import * as FS from './fullscreen.js?v=202611271341';
+import { startRoom } from './room.js?v=202611271341';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -221,10 +221,25 @@ function boot() {
   if (G.awayGain > 1) setTimeout(() => UI.toast(`자리를 비운 동안 창고에 엽전 ${E.fmt(G.awayGain)}이 쌓였어요!`, 'good', 'coin'), 600);
   if (G.s.newEraNotice) { delete G.s.newEraNotice; GM.save('era'); setTimeout(() => UI.newEraNews?.(), 900); }
   // 내 마을에 놀러 온 친구들이 걸어 다니는 모습 보기 (구경만)
-  if (sync.enabled && sync.docId && !G.s.teacher && !hostRoom) hostRoom = startRoom({ vid: sync.docId, village: G.s, renderer: R, layer: $('hostTags'), me: null, onToast: m => { sfx('rare'); UI.toast(m, 'good', 'people'); } });
+  if (sync.enabled && sync.docId && !G.s.teacher && !hostRoom) hostRoom = makeHostRoom();
   requestAnimationFrame(loop);
 }
-let last = performance.now(), hostRoom = null;
+let last = performance.now(), hostRoom = null, joinT = 0;
+function makeHostRoom() {
+  return startRoom({ vid: sync.docId, village: G.s, renderer: R, layer: $('hostTags'), me: null, onToast: m => { sfx('rare'); UI.toast(m, 'good', 'people'); } });
+}
+// 놀러 온 친구가 있으면 ‘같이 놀기’ 버튼이 떠요 → 내 마을에서 나도 걸어 다니며 같이 놀아요
+function updateHostJoin() {
+  const el = $('hostJoin'); if (!el) return;
+  const n = hostRoom ? hostRoom.count() : 0, busy = !$('overlay').classList.contains('hidden');
+  el.classList.toggle('hidden', !n || busy);
+  if (n) { const t = `친구 ${n}명이 놀러 왔어요 · 같이 놀기`; if (el.dataset.t !== t) { el.dataset.t = t; el.querySelector('span').textContent = t; } }
+}
+btn('hostJoin', () => {
+  if (!hostRoom || !sync.docId) return;
+  hostRoom.stop(); hostRoom = null; updateHostJoin();
+  UI.visitFriend({ ...G.s, id: sync.docId, summary: { avatar: G.s.avatar || 0 } }, { own: true, onClose: () => { if (!hostRoom && sync.enabled && sync.docId) hostRoom = makeHostRoom(); } });
+});
 function loop(t) {
   const dt = Math.min(0.1, (t - last) / 1000); last = t;
   if (G.s && !sync.stale && ((!sync.classControl.paused && !sync.global.closed) || G.s.teacher)) GM.tick(dt);
@@ -233,6 +248,7 @@ function loop(t) {
     hostRoom?.step(dt);
     R.draw(G.s, { coinImg, warnImg, storageRatio: G.cap ? G.s.storage / G.cap : 0, portraits: UI.portraitImg }, dt);
     hostRoom?.drawTags();
+    if (t - joinT > 500) { joinT = t; updateHostJoin(); }
     UI.updateHud();
   }
   requestAnimationFrame(loop);

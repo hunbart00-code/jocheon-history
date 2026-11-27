@@ -1,22 +1,22 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271314';
-import * as GM from './game.js?v=202611271314';
-import { G } from './game.js?v=202611271314';
-import * as S from './sprites.js?v=202611271314';
-import { VERSION } from './mode.js?v=202611271314';
-import * as Q from './quiz.js?v=202611271314';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271314';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271314';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271314';
-import { HEROES, H } from './data-heroes.js?v=202611271314';
-import { TECHS, T } from './data-techs.js?v=202611271314';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271314';
-import { QZ } from './data-quizzes.js?v=202611271314';
-import { sync } from './sync.js?v=202611271314';
-import { Renderer } from './render.js?v=202611271314';
-import { startRoom } from './room.js?v=202611271314';
+import * as E from './economy.js?v=202611271341';
+import * as GM from './game.js?v=202611271341';
+import { G } from './game.js?v=202611271341';
+import * as S from './sprites.js?v=202611271341';
+import { VERSION } from './mode.js?v=202611271341';
+import * as Q from './quiz.js?v=202611271341';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271341';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271341';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271341';
+import { HEROES, H } from './data-heroes.js?v=202611271341';
+import { TECHS, T } from './data-techs.js?v=202611271341';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271341';
+import { QZ } from './data-quizzes.js?v=202611271341';
+import { sync } from './sync.js?v=202611271341';
+import { Renderer } from './render.js?v=202611271341';
+import { startRoom, EMOTES, OX } from './room.js?v=202611271341';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -563,22 +563,29 @@ export function openFriends() {
 }
 
 let visitR = null, visitRAF = 0;
-export function visitFriend(d) {
+export function visitFriend(d, vopt = {}) {
   const ov = $('overlay'); ov.classList.remove('hidden', 'leaving'); ov.classList.add('visit'); ov.style.background = '#3a8fcf';
-  const crisisOn = () => d.crisis && !d.crisis.resolved && !(d.help && d.help.crisisAt === d.crisis.at);
+  const own = !!vopt.own;            // 내 마을에서 놀러 온 친구들과 같이 놀기
+  const crisisOn = () => !own && d.crisis && !d.crisis.resolved && !(d.help && d.help.crisisAt === d.crisis.at);
   ov.innerHTML = `<canvas id="visitCv" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
     <div class="panel" style="position:absolute;top:.8em;left:50%;transform:translateX(-50%);font-size:1.4em;gap:.6em">
       <img src="${avatarURL(d.summary?.avatar || 0)}" style="width:2em;height:2em;image-rendering:pixelated;border-radius:.3em" alt="">
-      <span>${esc(d.name)}의 마을 · ${d.era}단계 ${ERAS[d.era]?.name || ''}</span></div>
+      <span>${own ? '우리 마을 · 친구들과 함께 놀기' : `${esc(d.name)}의 마을 · ${d.era}단계 ${ERAS[d.era]?.name || ''}`}</span></div>
     <div class="av-layer" id="visitTags"></div>
-    <div class="v-hint" id="vHint">방향키(또는 W·A·S·D)로 걸어 다니고, 아래 칸에 말하면 말풍선이 떠요</div>
+    <div class="v-hint" id="vHint">방향키로 걷기 · 숫자 1~6 감정 표현 · 반짝이는 보물을 주워요</div>
+    <div class="v-stat" id="vStat"></div>
+    <div class="ox-panel hidden" id="oxPanel"><div class="ox-top"><b class="ox-badge">역사 OX 퀴즈</b><span id="oxStep"></span><span class="ox-sec" id="oxSec"></span></div><p class="ox-q" id="oxQ"></p><p class="ox-sub" id="oxSub"></p></div>
+    <div class="ox-result hidden" id="oxResult"></div>
+    <div class="v-emo" id="vEmo">${EMOTES.map((e, i) => `<button type="button" data-emo="${e.id}" title="${e.label} (${i + 1})"><span class="em">${e.e}</span><small>${i + 1} ${e.label}</small></button>`).join('')}</div>
+    <div class="v-gains" id="vGains"></div>
     <div class="dpad" id="vPad" aria-label="움직이기">${['u', 'l', 'r', 'd'].map(k => `<button type="button" data-dir="${k}" class="dp-${k}" aria-label="${{ u: '위', d: '아래', l: '왼쪽', r: '오른쪽' }[k]}">${{ u: '▲', d: '▼', l: '◀', r: '▶' }[k]}</button>`).join('')}</div>
     <div class="v-bottom">
       <form class="v-chat" id="vChat" autocomplete="off"><input id="vChatIn" maxlength="40" placeholder="${sync.classControl?.chatOff ? '선생님이 채팅을 꺼 두었어요' : '말풍선으로 말해요 (엔터)'}" ${sync.classControl?.chatOff ? 'disabled' : ''}><button class="btn green" type="submit" ${sync.classControl?.chatOff ? 'disabled' : ''}>말하기</button></form>
       <div class="v-bar" id="visitBar">
-        ${STICKERS.map(st => `<button class="btn gold" data-st="${st.id}">${icon(st.icon)} ${st.label}</button>`).join('')}
+        <button class="btn purple" id="vOX"><b class="ox-ic">O<i>X</i></b> OX 퀴즈</button>
+        ${own ? '' : STICKERS.map(st => `<button class="btn gold" data-st="${st.id}">${icon(st.icon)} ${st.label}</button>`).join('')}
         <button class="btn red ${crisisOn() ? '' : 'hidden'}" id="vHelp">${icon('warn')} 위기 막아 주기</button>
-        ${d.summary?.pvp && G.s.pvp ? `<button class="btn red" id="vWar">${icon('war')} 선전포고</button>` : ''}
+        ${!own && d.summary?.pvp && G.s.pvp ? `<button class="btn red" id="vWar">${icon('war')} 선전포고</button>` : ''}
         <button class="btn gray" id="vBack">우리 마을로</button>
       </div>
     </div>`;
@@ -591,7 +598,73 @@ export function visitFriend(d) {
     vid, village: d, renderer: visitR, layer: $('visitTags'),
     me: { name: G.s.name, no: G.s.studentNo, cls: G.s.classCode, av: G.s.avatar || 0, era: G.s.era, label: `${G.s.studentNo ? G.s.studentNo + '번 ' : ''}${G.s.name}` },
     onSay: text => { if (sync.enabled && sync.classCode && !sync.classControl?.chatOff) sync.sendChat(G.s, `[${d.name} 마을] ${text}`.slice(0, 80)).catch(() => {}); },   // 선생님이 교사 화면에서 볼 수 있게
+    onToast: m => toast(m, 'info'),
+    canTreasure: () => GM.treasureLeft() > 0,
+    onReward: ev => {
+      if (ev.type === 'treasure') {
+        const r = GM.treasureReward(ev.big); sfx(ev.big ? 'rare' : 'coin');
+        gain(r.gold ? `${ev.big ? '보물 상자! ' : ''}엽전 +${F(r.gold)}` : '오늘 보물 보상은 다 받았어요', 'coin');
+      } else if (ev.type === 'ox') {
+        const r = GM.oxReward(ev.right); sfx(ev.right ? 'correct' : 'wrong');
+        oxMine = ev.right ? `맞았어요!${r.kp ? ` KP +${F(r.kp)}` : r.limit ? ' (오늘 OX 보상은 다 받았어요)' : ''}` : ev.zone ? '아쉬워요! 다음 문제는 맞혀 봐요' : '가운데 줄에 있으면 답한 게 아니에요';
+        if (r.kp) { oxKp += r.kp; gain(`KP +${F(r.kp)}`, 'kp'); }
+      }
+      updateStat(); updateHud(true);
+    },
+    onOx: info => showOx(info),
+    onOxEnd: res => showOxResult(res),
   });
+  if (window.__autoStart) window.__room = room;   // 시험할 때만
+  let oxMine = '', oxKp = 0, lastSec = 0, oxHideT = 0;
+  const updateStat = () => { const el = $('vStat'); if (el) el.innerHTML = `오늘 남은 보상 · 보물 <b>${GM.treasureLeft()}</b> · OX <b>${GM.oxLeft()}</b>`; };
+  updateStat();
+  function gain(text, ic) {
+    const box = $('vGains'); if (!box) return;
+    const el = document.createElement('div'); el.className = 'v-gain'; el.innerHTML = `${icon(ic)}<span>${esc(text)}</span>`;
+    box.appendChild(el); setTimeout(() => el.remove(), 2200);
+  }
+  function showOx(info) {
+    const p = $('oxPanel'); if (!p) return;
+    const btn = $('vOX');
+    if (!info) { p.classList.add('hidden'); $('vHint')?.classList.remove('hidden'); if (btn) { btn.disabled = false; btn.classList.remove('busy'); } oxKp = 0; return; }
+    p.classList.remove('hidden'); $('vHint')?.classList.add('hidden'); if (btn) { btn.disabled = true; btn.classList.add('busy'); }
+    p.dataset.phase = info.phase; p.dataset.zone = info.zone || 'mid';
+    const zoneTxt = info.zone === 'O' ? '지금 <b class="o">O</b> 쪽에 있어요' : info.zone === 'X' ? '지금 <b class="x">X</b> 쪽에 있어요' : '가운데 줄이에요! O나 X 쪽으로 걸어가요';
+    if (info.phase === 'ready') {
+      $('oxStep').textContent = `${info.by || '친구'} 친구가 시작했어요`; $('oxSec').textContent = info.sec;
+      $('oxQ').innerHTML = '왼쪽은 <b class="o">O</b>, 오른쪽은 <b class="x">X</b>! 답이라고 생각하는 쪽으로 걸어가요';
+      $('oxSub').textContent = `모두 ${info.n}문제 · 맞히면 KP를 받아요`;
+      if (info.sec !== lastSec) { lastSec = info.sec; sfx('tick'); }
+      oxMine = '';
+    } else if (info.phase === 'think') {
+      $('oxStep').textContent = `문제 ${info.round + 1} / ${info.n}`; $('oxSec').textContent = info.sec;
+      $('oxQ').textContent = info.q; $('oxSub').innerHTML = zoneTxt;
+      if (info.sec !== lastSec) { lastSec = info.sec; if (info.sec <= 3) sfx('tick'); }
+    } else if (info.phase === 'show') {
+      $('oxStep').textContent = `문제 ${info.round + 1} / ${info.n}`; $('oxSec').textContent = '';
+      $('oxQ').innerHTML = `정답은 <b class="${info.answer ? 'o' : 'x'}">${info.answer ? 'O' : 'X'}</b>! <span class="ox-exp">${esc(info.exp)}</span>`;
+      $('oxSub').textContent = info.judged ? oxMine : '다음 문제부터 같이 풀어요';
+    } else {
+      $('oxStep').textContent = '결과를 모으는 중…'; $('oxSec').textContent = ''; $('oxQ').textContent = `${info.n}문제 중 ${info.score}문제 맞혔어요!`; $('oxSub').textContent = '';
+    }
+  }
+  function showOxResult(res) {
+    const el = $('oxResult'); if (!el) return;
+    const medal = ['🥇', '🥈', '🥉'];
+    let rank = 0, prev = -1;
+    const rows = res.rows.slice(0, 8).map((r, i) => { if (r.score !== prev) { rank = i; prev = r.score; } return `<li class="${r.me ? 'me' : ''}"><span class="rk">${medal[rank] || rank + 1}</span><span class="nm">${r.no ? r.no + '번 ' : ''}${esc(r.name)}</span><b>${r.score} / ${res.n}</b></li>`; }).join('');
+    el.innerHTML = `<div class="ox-r-head">역사 OX 퀴즈 결과</div><ol>${rows}</ol><p class="ox-r-me">나는 ${res.mine}문제 맞혔어요${oxKp ? ` · KP +${F(oxKp)}` : ''}${res.top > 0 && res.mine === res.top ? ' · 1등 왕관!' : ''}</p><button class="btn gold" id="oxClose">닫기</button>`;
+    const hide = () => el.classList.add('hidden');
+    $('oxClose').onclick = () => { sfx('click'); hide(); };
+    if (res.update) return;                       // 점수만 새로 고침 (이미 닫았으면 그대로)
+    el.classList.remove('hidden'); sfx(res.top > 0 && res.mine === res.top ? 'fanfare' : 'levelup');
+    clearTimeout(oxHideT); oxHideT = setTimeout(hide, 11000);
+  }
+  $('vOX').onclick = () => {
+    if (room.oxBusy()) return;
+    sfx('click'); if (room.startOx()) { $('oxResult')?.classList.add('hidden'); }
+  };
+  ov.querySelectorAll('[data-emo]').forEach(b => b.onclick = () => { if (room.emote(b.dataset.emo)) { sfx('click'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 300); } });
   $('vChat').onsubmit = e => {
     e.preventDefault(); const inp = $('vChatIn'); const r = room.say(inp.value);
     if (r.ok) { inp.value = ''; sfx('click'); inp.blur(); }
@@ -616,7 +689,7 @@ export function visitFriend(d) {
   visitRAF = requestAnimationFrame(loop);
   let closed = false;
   const close = () => {
-    if (closed) return; closed = true; room.stop();
+    if (closed) return; closed = true; room.stop(); vopt.onClose?.();
     ov.classList.add('leaving'); updateHud(true);
     setTimeout(() => {
       cancelAnimationFrame(visitRAF);
