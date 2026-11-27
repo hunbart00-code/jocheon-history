@@ -851,16 +851,26 @@ body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
 .upd-banner span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .upd-banner i { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #8fd0ff; border-top-color: transparent; flex: none; animation: upd-spin 0.8s linear infinite; }
 @keyframes upd-spin { to { transform: rotate(360deg); } }
-/* 선생님 전체 공지 (세계 공지) */
-.world-notice { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 96; display: flex; align-items: center; gap: 10px; max-width: min(92vw, 760px); padding: 10px 14px 10px 10px; border-radius: 16px; cursor: pointer;
-  background: linear-gradient(180deg, #ffe27a, #f2a722); color: #3a1a05; border: 3px solid #7a3a08; box-shadow: 0 0 0 3px #ffe9a8 inset, 0 8px 22px rgba(0,0,0,0.4); font-family: 'Jua', sans-serif; animation: wn-in 0.45s cubic-bezier(.2,.9,.3,1.2); }
-.world-notice.out { animation: wn-out 0.4s ease-in forwards; }
-.world-notice .wn-ic { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #c8352b; color: #fff; box-shadow: 0 2px 0 #7a1a10; animation: wn-shake 0.6s 0.4s 2; }
-.world-notice .wn-ic svg { width: 20px; height: 20px; }
-.world-notice b { flex: none; font-weight: normal; font-size: 15px; background: #7a3a08; color: #ffe9a8; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
-.world-notice .wn-txt { font-size: 18px; line-height: 1.3; min-width: 0; overflow-wrap: anywhere; }
-.world-notice .wn-x { flex: none; background: none; border: 0; color: #7a3a08; font-size: 18px; cursor: pointer; padding: 0 2px; }
-@keyframes wn-in { from { transform: translate(-50%, -140%); opacity: 0; } }
-@keyframes wn-out { to { transform: translate(-50%, -140%); opacity: 0; } }
-@keyframes wn-shake { 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
-@media (max-height: 520px) { .world-notice { top: 6px; padding: 6px 10px 6px 6px; gap: 7px; } .world-notice .wn-ic { width: 26px; height: 26px; } .world-notice b { font-size: 12px; } .world-notice .wn-txt { font-size: 14px; } }
+/* 선생님 전체 공지 (세계 공지) — 게임 시스템 문구 띠
+   게임 화면: 왼쪽 도구 줄과 오른쪽 게이지 사이 빈 곳에만 깔려요 (가리는 것 없이) */
+.world-notice { position: fixed; z-index: 96; font-size: var(--u, 14px); cursor: pointer; height: 2.9em; display: flex; align-items: center; justify-content: center;
+  top: calc(var(--top, 0.6em) + var(--row, 3.5em) * 2 + var(--hgap, 0.45em) + 0.9em);
+  left: calc(var(--side, 0.8em) + 6.6em + var(--sl, 0px)); right: calc(var(--side, 0.8em) + 8.6em + var(--sr, 0px));
+  background: linear-gradient(90deg, rgba(36,38,46,0) 0%, rgba(36,38,46,0.76) 10%, rgba(36,38,46,0.76) 90%, rgba(36,38,46,0) 100%);
+  animation: wn-sweep-in 0.6s cubic-bezier(.25,.8,.3,1) both; }
+.world-notice::before, .world-notice::after { content: ''; position: absolute; left: 6%; right: 6%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent); }
+.world-notice::before { top: 0; } .world-notice::after { bottom: 0; }
+.world-notice.out { animation: wn-sweep-out 0.6s cubic-bezier(.6,0,.8,.4) forwards; }
+.wn-track { width: calc(100% - 4em); overflow: hidden; text-align: center; }
+.world-notice.long .wn-track { text-align: left; }
+.wn-in { display: inline-block; animation: wn-text-in 0.7s 0.15s cubic-bezier(.25,.8,.3,1) both; }
+.wn-msg { display: inline-block; white-space: nowrap; color: #fff; font-family: 'Jua', sans-serif; font-size: 1.4em; line-height: 1.6; letter-spacing: 0.02em; text-shadow: 0 1px 2px rgba(0,0,0,0.7); }
+.world-notice.long .wn-msg { animation: wn-scroll var(--dur, 6s) 1.8s linear forwards; }
+.wn-msg b { font-weight: normal; color: #ffd84a; margin-right: 0.4em; }
+.wn-msg .wn-ic { width: 1.05em; height: 1.05em; color: #ffd84a; vertical-align: -0.15em; margin-right: 0.35em; }
+@keyframes wn-sweep-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes wn-sweep-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 0 100%); } }
+@keyframes wn-text-in { from { transform: translateX(-3em); opacity: 0; } }
+@keyframes wn-scroll { to { transform: translateX(var(--shift, 0)); } }
+/* 첫 화면: 로고 아래로 화면 가로 전체 */
+body.title-on .world-notice { left: 0; right: calc(min(1vh, 0.62vw) * 13 + var(--sr, 0px)); top: 27%; }   /* 오른쪽 아이콘 줄은 비켜요 */

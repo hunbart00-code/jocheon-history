@@ -1,21 +1,21 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271250';
-import * as GM from './game.js?v=202611271250';
-import { G } from './game.js?v=202611271250';
-import * as S from './sprites.js?v=202611271250';
-import { VERSION } from './mode.js?v=202611271250';
-import * as Q from './quiz.js?v=202611271250';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271250';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271250';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271250';
-import { HEROES, H } from './data-heroes.js?v=202611271250';
-import { TECHS, T } from './data-techs.js?v=202611271250';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271250';
-import { QZ } from './data-quizzes.js?v=202611271250';
-import { sync } from './sync.js?v=202611271250';
-import { Renderer } from './render.js?v=202611271250';
+import * as E from './economy.js?v=202611271256';
+import * as GM from './game.js?v=202611271256';
+import { G } from './game.js?v=202611271256';
+import * as S from './sprites.js?v=202611271256';
+import { VERSION } from './mode.js?v=202611271256';
+import * as Q from './quiz.js?v=202611271256';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271256';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271256';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271256';
+import { HEROES, H } from './data-heroes.js?v=202611271256';
+import { TECHS, T } from './data-techs.js?v=202611271256';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271256';
+import { QZ } from './data-quizzes.js?v=202611271256';
+import { sync } from './sync.js?v=202611271256';
+import { Renderer } from './render.js?v=202611271256';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -655,14 +655,21 @@ export function fullHelp(ios) {
     <button class="btn gold" data-close style="font-size:1.2em;margin-top:.4em">알겠어요</button></div>`, 'narrow');
 }
 
-// 선생님 전체 공지 (세계 공지) — 화면 위쪽에 띠로 15초
+// 선생님 전체 공지 (세계 공지) — 게임 시스템 문구처럼 회색 반투명 띠가 왼쪽에서 오른쪽으로 펼쳐져요
 export function worldNotice(text) {
   document.querySelector('.world-notice')?.remove();
   const el = document.createElement('div'); el.className = 'world-notice'; el.setAttribute('role', 'status');
-  el.innerHTML = `<span class="wn-ic"><svg viewBox="0 0 24 24"><path d="M3 10v4l3 1 2 5h2l-1-4.4L18 19V5L6 9z" fill="currentColor"/><path d="M20.5 9.5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>선생님 공지</b><span class="wn-txt">${esc(text)}</span><button class="wn-x" aria-label="닫기">✕</button>`;
+  el.innerHTML = `<div class="wn-track"><div class="wn-in"><div class="wn-msg"><svg class="wn-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4l3 1 2 5h2l-1-4.4L18 19V5L6 9z" fill="currentColor"/><path d="M20.5 9.5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>[선생님 공지]</b><span class="wn-t">${esc(text)}</span></div></div></div>`;
   document.body.appendChild(el); sfx('rare');
-  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 400); };
-  el.onclick = close; setTimeout(close, 15000);
+  // 글이 띠보다 길면 앞부분을 보여 준 뒤 천천히 흘러가 끝까지 보여 줘요
+  requestAnimationFrame(() => {
+    const tr = el.querySelector('.wn-track'), msg = el.querySelector('.wn-msg');
+    const over = msg.offsetWidth - tr.clientWidth;
+    if (over > 4) { el.classList.add('long'); msg.style.setProperty('--shift', `-${over + 16}px`); msg.style.setProperty('--dur', `${Math.max(4, over / 45).toFixed(1)}s`); }
+  });
+  let gone = false;
+  const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 650); };
+  el.onclick = close; setTimeout(close, 11000);
 }
 
 // 첫 화면의 ‘새 소식’
