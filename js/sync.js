@@ -6,7 +6,7 @@
 //   chats/{학급코드}/msgs/{자동}: 학급 채팅 (최근 50개만 구독)
 //  firebase-config.js 의 apiKey 가 비어 있으면 아무것도 하지 않습니다(로컬 모드).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271212';
+import { firebaseConfig } from './firebase-config.js?v=202611271238';
 
 const V = '10.12.2';
 const CDN = `https://www.gstatic.com/firebasejs/${V}/`;

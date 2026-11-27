@@ -1,21 +1,21 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271212';
-import { G } from './game.js?v=202611271212';
-import * as UI from './ui.js?v=202611271212';
-import { ctx } from './ui.js?v=202611271212';
-import { Renderer } from './render.js?v=202611271212';
-import * as S from './sprites.js?v=202611271212';
-import * as E from './economy.js?v=202611271212';
-import { B, D } from './data-buildings.js?v=202611271212';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271212';
-import { sync } from './sync.js?v=202611271212';
-import { preloadImages, uiImages } from './images.js?v=202611271212';
-import { initSocial } from './social.js?v=202611271212';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271212';
-import * as Title from './title.js?v=202611271212';
-import * as FS from './fullscreen.js?v=202611271212';
+import * as GM from './game.js?v=202611271238';
+import { G } from './game.js?v=202611271238';
+import * as UI from './ui.js?v=202611271238';
+import { ctx } from './ui.js?v=202611271238';
+import { Renderer } from './render.js?v=202611271238';
+import * as S from './sprites.js?v=202611271238';
+import * as E from './economy.js?v=202611271238';
+import { B, D } from './data-buildings.js?v=202611271238';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271238';
+import { sync } from './sync.js?v=202611271238';
+import { preloadImages, uiImages } from './images.js?v=202611271238';
+import { initSocial } from './social.js?v=202611271238';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271238';
+import * as Title from './title.js?v=202611271238';
+import * as FS from './fullscreen.js?v=202611271238';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');

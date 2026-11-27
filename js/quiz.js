@@ -1,13 +1,13 @@
 // =============================================================
 //  문제 출제 엔진 — 현재 시대 70% + 이전 시대 30%, 오답 큐 재출제, 자동 생성 문제
 // =============================================================
-import { QUIZZES, QZ } from './data-quizzes.js?v=202611271212';
-import { RELICS, R } from './data-relics.js?v=202611271212';
-import { BUILDINGS, B } from './data-buildings.js?v=202611271212';
-import { HEROES, H } from './data-heroes.js?v=202611271212';
-import { BAL, HISTORY_ERA } from './data-config.js?v=202611271212';
-import { mathQuestion, mathById, levelOfEra, pickTier } from './data-math.js?v=202611271212';
-import { engById, ENG_IDS, ENG_TYPES, ENG_TIER } from './data-english.js?v=202611271212';
+import { QUIZZES, QZ } from './data-quizzes.js?v=202611271238';
+import { RELICS, R } from './data-relics.js?v=202611271238';
+import { BUILDINGS, B } from './data-buildings.js?v=202611271238';
+import { HEROES, H } from './data-heroes.js?v=202611271238';
+import { BAL, HISTORY_ERA } from './data-config.js?v=202611271238';
+import { mathQuestion, mathById, levelOfEra, pickTier } from './data-math.js?v=202611271238';
+import { engById, ENG_IDS, ENG_TYPES, ENG_TIER } from './data-english.js?v=202611271238';
 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -27,7 +27,7 @@ const GEN_SKIP = new Set(['주령구', '발해 치미', '이불병좌상', '칠�
 // 8단계부터의 건물·유물은 교과서 내용이 아니라서 역사 문제로 만들지 않아요
 const RELICS_OK = RELICS.filter(r => !GEN_SKIP.has(r.name) && r.era <= HISTORY_ERA);
 const BLD_OK = BUILDINGS.filter(b => !GEN_SKIP.has(b.name) && b.era <= HISTORY_ERA);
-const HEROES_OK = HEROES.filter(h => !GEN_SKIP.has(h.name));
+const HEROES_OK = HEROES.filter(h => !GEN_SKIP.has(h.name) && !h.fiction && h.era <= HISTORY_ERA);   // 상상 인물·8단계 이후는 한국사 퀴즈에서 빼요
 function genQuestion(era, kind) {
   if (kind === 'relic') {
     const pool = RELICS_OK.filter(r => r.era <= era);

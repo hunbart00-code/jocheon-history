@@ -3,7 +3,7 @@
 //  아이소메트릭 좌표: P(u, v, z)  u,v = 타일 단위(-0.5~0.5), z = 높이(px)
 //  * 선생님이 직접 만든 그림(PNG)을 쓰고 싶으면 data-buildings.js 에 img: '파일경로' 를 넣으면 됩니다.
 // =============================================================
-import { getImage } from './images.js?v=202611271212';
+import { getImage } from './images.js?v=202611271238';
 export const TW = 64, TH = 32;
 
 function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -1130,8 +1130,9 @@ export function portraitCanvas(h, size = 48) {
   R(0, 0, 32, 32, '#00000000');
   // 옷
   R(5, 24, 22, 8, L.robe); R(13, 24, 6, 8, shade(L.robe, 0.25)); R(5, 24, 22, 1, L.trim); R(14, 24, 4, 3, L.trim);
-  // 얼굴
-  R(10, 9, 12, 14, '#f2c9a0'); R(9, 13, 1, 4, '#e8b88a'); R(22, 13, 1, 4, '#e8b88a');
+  // 얼굴 (외계 친구는 피부색이 달라요)
+  const SKC = L.skin || '#f2c9a0';
+  R(10, 9, 12, 14, SKC); R(9, 13, 1, 4, shade(SKC, -0.08)); R(22, 13, 1, 4, shade(SKC, -0.08));
   R(12, 14, 2, 2, '#222'); R(18, 14, 2, 2, '#222'); R(12, 13, 2, 1, L.hair); R(18, 13, 2, 1, L.hair);
   R(15, 18, 2, 1, '#d99a7a'); R(14, 20, 4, 1, '#b8604a');
   // 머리
@@ -1139,7 +1140,7 @@ export function portraitCanvas(h, size = 48) {
   if (L.female) { R(8, 9, 3, 14, L.hair); R(21, 9, 3, 14, L.hair); R(11, 19, 2, 1, '#f0a0a0'); R(19, 19, 2, 1, '#f0a0a0'); }
   if (L.braid) { R(22, 20, 3, 8, L.hair); R(22, 27, 3, 2, '#c0392b'); }
   if (L.short) { R(10, 6, 12, 3, L.hair); }
-  if (L.glasses) { R(11, 13, 4, 4, '#222'); R(12, 14, 2, 2, '#f2c9a0'); R(17, 13, 4, 4, '#222'); R(18, 14, 2, 2, '#f2c9a0'); R(15, 14, 2, 1, '#222'); R(12, 15, 1, 1, '#222'); R(18, 15, 1, 1, '#222'); }
+  if (L.glasses) { R(11, 13, 4, 4, '#222'); R(12, 14, 2, 2, SKC); R(17, 13, 4, 4, '#222'); R(18, 14, 2, 2, SKC); R(15, 14, 2, 1, '#222'); R(12, 15, 1, 1, '#222'); R(18, 15, 1, 1, '#222'); }
   // 수염
   if (L.beard === 'long') { R(12, 20, 8, 7, L.beardColor || '#2a2a2a'); R(13, 27, 6, 2, L.beardColor || '#2a2a2a'); R(14, 20, 4, 1, '#b8604a'); }
   if (L.beard === 'short') { R(12, 21, 8, 3, '#2a2a2a'); R(14, 20, 4, 1, '#b8604a'); }
@@ -1156,6 +1157,8 @@ export function portraitCanvas(h, size = 48) {
     case 'samo': R(10, 3, 12, 6, '#1a1a1a'); R(13, 1, 6, 3, '#1a1a1a'); R(5, 6, 5, 2, '#1a1a1a'); R(22, 6, 5, 2, '#1a1a1a'); break;
     case 'king': R(10, 2, 12, 7, '#1a1a1a'); R(12, 0, 8, 3, '#1a1a1a'); R(9, 5, 2, 2, '#1a1a1a'); R(21, 5, 2, 2, '#1a1a1a'); R(15, 3, 2, 2, '#e2b23a'); break;
     case 'gat': R(4, 7, 24, 2, '#1a1a1a'); R(11, 1, 10, 7, '#1a1a1a'); R(12, 2, 8, 1, '#3a3a3a'); R(8, 9, 1, 12, '#1a1a1a'); R(23, 9, 1, 12, '#1a1a1a'); break;
+    case 'spacehelm': R(8, 2, 16, 4, '#eef2f6'); R(6, 5, 3, 17, '#d8dee6'); R(23, 5, 3, 17, '#d8dee6'); R(9, 6, 14, 1, '#8fd0ff'); R(7, 21, 18, 2, '#b8c2cc'); R(22, 0, 2, 3, '#9aa6b4'); R(21, 0, 4, 1, '#ff5a5a'); R(10, 3, 4, 1, '#ffffff'); break;
+    case 'antenna': R(12, 2, 1, 6, '#3a5a2a'); R(19, 2, 1, 6, '#3a5a2a'); R(11, 0, 3, 3, '#ffe14a'); R(18, 0, 3, 3, '#ff7ad8'); break;
   }
   finish(a, { outline: '#2b1b10' });
   if (size === 32) return a.c;

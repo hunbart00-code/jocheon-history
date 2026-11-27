@@ -1,21 +1,21 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271212';
-import * as GM from './game.js?v=202611271212';
-import { G } from './game.js?v=202611271212';
-import * as S from './sprites.js?v=202611271212';
-import { VERSION } from './mode.js?v=202611271212';
-import * as Q from './quiz.js?v=202611271212';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271212';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271212';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271212';
-import { HEROES, H } from './data-heroes.js?v=202611271212';
-import { TECHS, T } from './data-techs.js?v=202611271212';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271212';
-import { QZ } from './data-quizzes.js?v=202611271212';
-import { sync } from './sync.js?v=202611271212';
-import { Renderer } from './render.js?v=202611271212';
+import * as E from './economy.js?v=202611271238';
+import * as GM from './game.js?v=202611271238';
+import { G } from './game.js?v=202611271238';
+import * as S from './sprites.js?v=202611271238';
+import { VERSION } from './mode.js?v=202611271238';
+import * as Q from './quiz.js?v=202611271238';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271238';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271238';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271238';
+import { HEROES, H } from './data-heroes.js?v=202611271238';
+import { TECHS, T } from './data-techs.js?v=202611271238';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271238';
+import { QZ } from './data-quizzes.js?v=202611271238';
+import { sync } from './sync.js?v=202611271238';
+import { Renderer } from './render.js?v=202611271238';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
