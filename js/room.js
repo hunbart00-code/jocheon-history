@@ -7,14 +7,14 @@
 //  서버: visits/{마을}/people/{나} · visits/{마을}/game/ox · visits/{마을}/picks/{보물}
 //  무료 서버 한도를 아끼려고, 위치는 ‘방향이 바뀔 때’와 3초마다만 보내고 나머지는 예측해서 그려요
 // =============================================================
-import * as S from './sprites.js?v=202611271343';
-import { tileToWorld } from './render.js?v=202611271343';
-import { activeOffset, occupancy } from './economy.js?v=202611271343';
-import { B } from './data-buildings.js?v=202611271343';
-import { QUIZZES } from './data-quizzes.js?v=202611271343';
-import { HISTORY_ERA } from './data-config.js?v=202611271343';
-import { sync } from './sync.js?v=202611271343';
-import { badWord } from './badwords.js?v=202611271343';
+import * as S from './sprites.js?v=202611271349';
+import { tileToWorld } from './render.js?v=202611271349';
+import { activeOffset, occupancy } from './economy.js?v=202611271349';
+import { B } from './data-buildings.js?v=202611271349';
+import { QUIZZES } from './data-quizzes.js?v=202611271349';
+import { HISTORY_ERA } from './data-config.js?v=202611271349';
+import { sync } from './sync.js?v=202611271349';
+import { badWord } from './badwords.js?v=202611271349';
 
 const SPEED = 1.7;            // 걷는 빠르기 (칸/초)
 const STRIDE = 0.8;           // 두 걸음에 가는 거리 (칸)

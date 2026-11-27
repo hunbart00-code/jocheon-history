@@ -3,17 +3,17 @@
 //   전쟁 흐름: 공격 쪽 준비(주민·위인·퀴즈) → 선전포고 → 수비 쪽 ‘전쟁할까요?’
 //            → 거절 또는 수락 → 수비 쪽 준비 → 결과(양쪽이 각자 자기 마을에 반영)
 // =============================================================
-import { badWord } from './badwords.js?v=202611271343';
-import * as E from './economy.js?v=202611271343';
-import * as GM from './game.js?v=202611271343';
-import { G } from './game.js?v=202611271343';
-import * as S from './sprites.js?v=202611271343';
-import * as Q from './quiz.js?v=202611271343';
-import { ctx, kit, toast, openModal, closeModal, modalOpen, updateHud, avatarURL, isQuizBusy } from './ui.js?v=202611271343';
-import { sfx } from './audio.js?v=202611271343';
-import { ERAS, BAL } from './data-config.js?v=202611271343';
-import { H } from './data-heroes.js?v=202611271343';
-import { sync } from './sync.js?v=202611271343';
+import { badWord } from './badwords.js?v=202611271349';
+import * as E from './economy.js?v=202611271349';
+import * as GM from './game.js?v=202611271349';
+import { G } from './game.js?v=202611271349';
+import * as S from './sprites.js?v=202611271349';
+import * as Q from './quiz.js?v=202611271349';
+import { ctx, kit, toast, openModal, closeModal, modalOpen, updateHud, avatarURL, isQuizBusy } from './ui.js?v=202611271349';
+import { sfx } from './audio.js?v=202611271349';
+import { ERAS, BAL } from './data-config.js?v=202611271349';
+import { H } from './data-heroes.js?v=202611271349';
+import { sync } from './sync.js?v=202611271349';
 
 const $ = id => document.getElementById(id);
 const { head, icon, esc, F } = kit;

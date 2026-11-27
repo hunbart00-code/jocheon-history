@@ -1,11 +1,11 @@
 // =============================================================
 //  아이소메트릭 마을 렌더러 (캔버스) — 카메라·확대·클릭 판정·애니메이션
 // =============================================================
-import * as S from './sprites.js?v=202611271343';
-import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271343';
-import { B, D } from './data-buildings.js?v=202611271343';
-import { H } from './data-heroes.js?v=202611271343';
-import { ERAS } from './data-config.js?v=202611271343';
+import * as S from './sprites.js?v=202611271349';
+import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271349';
+import { B, D } from './data-buildings.js?v=202611271349';
+import { H } from './data-heroes.js?v=202611271349';
+import { ERAS } from './data-config.js?v=202611271349';
 
 const ISL0 = -4, ISL1 = GRID + 3;   // 섬 범위 (타일)
 const tierOf = lv => lv >= 10 ? 2 : lv >= 5 ? 1 : 0;
@@ -218,7 +218,7 @@ export class Renderer {
     }
     // 친구 마을에 놀러 온 친구들 · 내 캐릭터 (방향키로 움직여요)
     for (const a of this.avatars || []) {
-      objs.push({ d: a.i + a.j + 0.03, i: a.i, j: a.j, spr: S.personSprite(a.k, 0, a.era || 1), flip: a.flipOv ?? a.flip, ring: a.me ? '#ffe14a' : '#ffffff',
+      objs.push({ d: a.i + a.j + 0.03, i: a.i, j: a.j, spr: S.personSprite(a.k, 0, a.era || 1), flip: a.flipOv ?? a.flip, ring: a.me ? '#ffe14a' : '#ffffff', xray: true,
         walk: { ph: a.ph || 0, amp: a.amp || 0, jump: a.jump || 0, tilt: a.tilt || 0, squash: a.squash || 0, seed: a.k + 3 } });
     }
     // 보물 (엽전 꾸러미·보물 상자)
@@ -226,6 +226,7 @@ export class Renderer {
     // 고스트(배치 미리보기)
     if (this.ghost && this.hover) objs.push({ d: this.hover.x + this.hover.y + 0.5, i: this.hover.x + (this.ghost.size === 2 ? 0.5 : 0), j: this.hover.y + (this.ghost.size === 2 ? 0.5 : 0), spr: this.ghost.spr, alpha: this.ghost.ok ? 0.75 : 0.35 });
     objs.sort((a, b) => a.d - b.d || a.i - b.i);
+    const xray = [];
     for (const o of objs) {
       const [X, Y] = tileToWorld(o.i, o.j);
       if (o.item) { this.drawItem(g, o.item, X, Y); continue; }
@@ -234,7 +235,7 @@ export class Renderer {
         g.fillStyle = '#ffe27a'; g.beginPath(); g.ellipse(X, Y, 30, 14, 0, 0, Math.PI * 2); g.fill(); g.restore();
       }
       if (o.ring) { g.save(); g.globalAlpha = 0.55; g.strokeStyle = o.ring; g.lineWidth = 1.5; g.beginPath(); g.ellipse(X, Y, 9, 4.5, 0, 0, Math.PI * 2); g.stroke(); g.restore(); }
-      if (o.walk) { this.drawWalker(g, o, X, Y); continue; }
+      if (o.walk) { this.drawWalker(g, o, X, Y); if (o.xray) xray.push([o, X, Y]); continue; }
       if (o.alpha) g.globalAlpha = o.alpha;
       if (o.broken) g.filter = 'grayscale(0.75) brightness(0.62) sepia(0.35)';
       if (o.flip) { g.save(); g.translate(X, 0); g.scale(-1, 1); g.drawImage(o.spr.img, -o.spr.ox, Y - o.spr.oy, o.spr.w, o.spr.h); g.restore(); }
@@ -261,6 +262,8 @@ export class Renderer {
       }
     }
 
+    // 나무·건물 뒤에 가려도 친구들이 흐릿하게 비쳐 보여요
+    if (xray.length) { g.globalAlpha = 0.5; for (const [o, X, Y] of xray) this.drawWalker(g, o, X, Y, true); g.globalAlpha = 1; }
     // 효과
     this.fx = this.fx.filter(f => (f.t += dt) < (f.life || 1));
     for (const f of this.fx) {
@@ -315,7 +318,7 @@ export class Renderer {
   }
   // 걷는 모습: 그림 한 장을 몸과 두 다리로 나눠서, 걸음마다 발을 번갈아 들고 몸은 통통·기우뚱해요
   // walk = { ph: 걸음 위치(라디안, 2π = 두 걸음), amp: 걷는 정도 0~1, jump, tilt, squash: 감정 표현용 }
-  drawWalker(g, o, X, Y) {
+  drawWalker(g, o, X, Y, ghost = false) {
     const spr = o.spr, w = o.walk, img = spr.img, rig = S.rigOf(spr);
     const k = img.width / spr.w, big = spr.h >= 27 ? 1 : 0.7;
     const amp = Math.max(0, Math.min(1, w.amp || 0)), sn = Math.sin(w.ph || 0), jump = Math.max(0, w.jump || 0);
@@ -326,7 +329,7 @@ export class Renderer {
     const tilt = sn * 0.05 * amp + (w.tilt || 0);
     // 그림자 (뛰면 작아져요)
     const sh = Math.max(0.45, 1 - jump / 18);
-    g.fillStyle = 'rgba(25,32,18,0.3)'; g.beginPath(); g.ellipse(X, Y, Math.max(3, spr.w * 0.34) * sh, Math.max(1.6, spr.w * 0.13) * sh, 0, 0, Math.PI * 2); g.fill();
+    if (!ghost) { g.fillStyle = 'rgba(25,32,18,0.3)'; g.beginPath(); g.ellipse(X, Y, Math.max(3, spr.w * 0.34) * sh, Math.max(1.6, spr.w * 0.13) * sh, 0, 0, Math.PI * 2); g.fill(); }
     const legPx = Math.max(1, Math.min(img.height - 1, Math.round(rig.leg * img.height))), spPx = Math.max(1, Math.min(img.width - 1, Math.round(rig.split * img.width)));
     const ovPx = Math.min(legPx, Math.round(3 * k)), lh = img.height - legPx + ovPx;
     const legY = legPx / k, sx = spPx / k, x0 = -spr.ox, y0 = -spr.oy;
