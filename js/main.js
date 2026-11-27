@@ -299,7 +299,7 @@ function applySkins() {
   // 9분할(border-image): 모서리 장식은 그대로 두고 가운데만 늘려요
   const nine = (k, sel, bw) => have.has(k) ? `${sel}{border:0 solid transparent !important;border-image:${u(k)} 30% 16% fill / ${bw} stretch !important;background:none !important;box-shadow:0 .35em .45em rgba(0,0,0,.32) !important}${sel.split(',').map(x => x + '::after').join(',')}{display:none !important}` : '';
   let css = '';
-  css += nine('btn_red', '.big.red', '1.9em 2.1em') + nine('btn_blue', '#btnBuild', '1.9em 2.1em') + nine(have.has('btn_teal') ? 'btn_teal' : 'btn_blue', '#btnHeroes', '1.9em 2.1em') + nine('btn_green', '.big.green', '1.9em 2.1em');
+  // 아래 큰 버튼 4개는 그림 대신 CSS 입체 버튼을 써요 (v1.8)
   css += nine('btn_gold', '.challenge', '.8em .95em');
   css += nine('panel_wood', '.hud-top .panel,.g-title', '.8em 1em') + nine('panel_wood', '.tool .t-lb', '.45em .6em');
   const tile = (k, sel) => have.has(k) ? `${sel}{background:${u(k)} center/100% 100% no-repeat !important;border:0 !important;border-radius:0 !important;box-shadow:0 .3em .45em rgba(0,0,0,.3) !important}` : '';
