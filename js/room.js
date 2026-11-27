@@ -7,14 +7,14 @@
 //  서버: visits/{마을}/people/{나} · visits/{마을}/game/ox · visits/{마을}/picks/{보물}
 //  무료 서버 한도를 아끼려고, 위치는 ‘방향이 바뀔 때’와 3초마다만 보내고 나머지는 예측해서 그려요
 // =============================================================
-import * as S from './sprites.js?v=202611271341';
-import { tileToWorld } from './render.js?v=202611271341';
-import { activeOffset, occupancy } from './economy.js?v=202611271341';
-import { B } from './data-buildings.js?v=202611271341';
-import { QUIZZES } from './data-quizzes.js?v=202611271341';
-import { HISTORY_ERA } from './data-config.js?v=202611271341';
-import { sync } from './sync.js?v=202611271341';
-import { badWord } from './badwords.js?v=202611271341';
+import * as S from './sprites.js?v=202611271343';
+import { tileToWorld } from './render.js?v=202611271343';
+import { activeOffset, occupancy } from './economy.js?v=202611271343';
+import { B } from './data-buildings.js?v=202611271343';
+import { QUIZZES } from './data-quizzes.js?v=202611271343';
+import { HISTORY_ERA } from './data-config.js?v=202611271343';
+import { sync } from './sync.js?v=202611271343';
+import { badWord } from './badwords.js?v=202611271343';
 
 const SPEED = 1.7;            // 걷는 빠르기 (칸/초)
 const STRIDE = 0.8;           // 두 걸음에 가는 거리 (칸)
@@ -156,6 +156,7 @@ export function startRoom(opt) {
   }
   function startOx() {
     if (!meInfo || oxActive()) return false;
+    if (sync.enabled && !(sync.srvOffN > 0)) return 'wait';        // 서버 시계를 아직 못 쟀어요 (들어온 지 1초 안)
     const g = { startAt: Math.round(srv() + OX.lead), seed: (Math.random() * 2147483646 | 0) + 1, n: OX.n, by: meInfo.name, era: Math.max(1, Math.min(HISTORY_ERA, village.era || 1)), at: Date.now() };
     game = g; oxKey = String(g.seed); oxQs = oxQuestions(g.seed, g.era, g.n); oxScore = 0; oxJudged = new Set(); oxSawThink = new Set(); oxEnded = '';
     sync.roomGameSet(vid, g).catch(e => console.warn('ox', e));

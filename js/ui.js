@@ -1,22 +1,22 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271341';
-import * as GM from './game.js?v=202611271341';
-import { G } from './game.js?v=202611271341';
-import * as S from './sprites.js?v=202611271341';
-import { VERSION } from './mode.js?v=202611271341';
-import * as Q from './quiz.js?v=202611271341';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271341';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271341';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271341';
-import { HEROES, H } from './data-heroes.js?v=202611271341';
-import { TECHS, T } from './data-techs.js?v=202611271341';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271341';
-import { QZ } from './data-quizzes.js?v=202611271341';
-import { sync } from './sync.js?v=202611271341';
-import { Renderer } from './render.js?v=202611271341';
-import { startRoom, EMOTES, OX } from './room.js?v=202611271341';
+import * as E from './economy.js?v=202611271343';
+import * as GM from './game.js?v=202611271343';
+import { G } from './game.js?v=202611271343';
+import * as S from './sprites.js?v=202611271343';
+import { VERSION } from './mode.js?v=202611271343';
+import * as Q from './quiz.js?v=202611271343';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271343';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271343';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271343';
+import { HEROES, H } from './data-heroes.js?v=202611271343';
+import { TECHS, T } from './data-techs.js?v=202611271343';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271343';
+import { QZ } from './data-quizzes.js?v=202611271343';
+import { sync } from './sync.js?v=202611271343';
+import { Renderer } from './render.js?v=202611271343';
+import { startRoom, EMOTES, OX } from './room.js?v=202611271343';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -662,7 +662,9 @@ export function visitFriend(d, vopt = {}) {
   }
   $('vOX').onclick = () => {
     if (room.oxBusy()) return;
-    sfx('click'); if (room.startOx()) { $('oxResult')?.classList.add('hidden'); }
+    sfx('click'); const r = room.startOx();
+    if (r === 'wait') toast('준비 중이에요. 1초 뒤에 다시 눌러 주세요!', 'info');
+    else if (r) $('oxResult')?.classList.add('hidden');
   };
   ov.querySelectorAll('[data-emo]').forEach(b => b.onclick = () => { if (room.emote(b.dataset.emo)) { sfx('click'); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 300); } });
   $('vChat').onsubmit = e => {

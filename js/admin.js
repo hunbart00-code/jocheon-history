@@ -5,9 +5,9 @@
 //   chats/{학급코드}/msgs : 최근 50개 보기 · 지우기
 //  누가 선생님인지는 Firestore 보안 규칙이 정해요 (teacher/check 문서를 읽을 수 있으면 선생님).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271341';
-import { ERAS, MAX_ERA } from './data-config.js?v=202611271341';
-import { badWord } from './badwords.js?v=202611271341';
+import { firebaseConfig } from './firebase-config.js?v=202611271343';
+import { ERAS, MAX_ERA } from './data-config.js?v=202611271343';
+import { badWord } from './badwords.js?v=202611271343';
 
 const CDN = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const $ = id => document.getElementById(id);
