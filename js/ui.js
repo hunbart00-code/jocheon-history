@@ -5,6 +5,7 @@ import * as E from './economy.js';
 import * as GM from './game.js';
 import { G } from './game.js';
 import * as S from './sprites.js';
+import { VERSION } from './mode.js';
 import * as Q from './quiz.js';
 import { sfx, setBgm, setSfx } from './audio.js';
 import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js';
@@ -458,7 +459,7 @@ export function openSettings() {
     <div style="display:flex;gap:.5em;margin:.4em 0 1em"><button class="btn" id="stCopy">코드 복사</button></div>
     <textarea class="code" id="codeIn" placeholder="여기에 백업 코드를 붙여 넣고 ‘불러오기’를 눌러요"></textarea>
     <div style="display:flex;gap:.5em;margin-top:.4em"><button class="btn green" id="stImport">불러오기</button><span style="flex:1"></span><button class="btn red" id="stReset">처음부터 다시</button></div>
-    <p class="muted" style="margin-top:1em">히스토리 빌더 v1.6 · ${sync.enabled ? `학급 서버에 자동 저장 중 (학급 코드 ${esc(G.s.classCode)} · ${G.s.studentNo}번)` : sync.configured ? '학급 서버 연결 안 됨 — 이 기기에만 저장 중' : '로컬 저장 모드'}</p>
+    <p class="muted" style="margin-top:1em">히스토리 빌더 v${VERSION} · ${sync.enabled ? `학급 서버에 자동 저장 중 (학급 코드 ${esc(G.s.classCode)} · ${G.s.studentNo}번)` : sync.configured ? '학급 서버 연결 안 됨 — 이 기기에만 저장 중' : '로컬 저장 모드'}</p>
   </div>`, 'narrow');
   $('swSfx').onclick = () => { s.settings.sfx = !s.settings.sfx; setSfx(s.settings.sfx); $('swSfx').classList.toggle('on', s.settings.sfx); sfx('click'); GM.save('settings'); };
   $('swBgm').onclick = () => { s.settings.bgm = !s.settings.bgm; setBgm(s.settings.bgm); $('swBgm').classList.toggle('on', s.settings.bgm); GM.save('settings'); };
@@ -624,6 +625,19 @@ export function newEraNews() {
     <p class="muted">오른쪽 위 <b>저장</b> 버튼을 누르면 학급 서버에 바로 저장돼요.</p>
     <button class="btn gold" data-close style="font-size:1.3em">출발!</button></div>`, 'narrow');
   sfx('fanfare');
+}
+
+// 첫 화면의 ‘새 소식’
+export function newsModal() {
+  const row = (ic, b, t) => `<li>${icon(ic)}<div><b>${b}</b><span>${t}</span></div></li>`;
+  openModal(`${head('새 소식', 'star')}<div class="sh-body"><ul class="news-list">
+    ${row('clock', '새 시대 3개가 열렸어요', '8 현대 대한민국 → 9 우주 시대 → 10 외계 시대')}
+    ${row('book', '수학·영어 문제', '퀴즈에서 과목(한국사·수학·영어·섞어서)을 골라 풀어요')}
+    ${row('museum', '새 건물 12종 · 유물 18종', '끝없이 올릴 수 있는 연구도 생겼어요')}
+    ${row('save', '저장 버튼', '오른쪽 위 저장 버튼을 누르면 바로 학급 서버에 저장돼요')}
+    ${row('star', '새 첫 화면', '밤하늘에 떠 있는 시대의 섬에서 출발해요')}
+  </ul><p class="muted" style="text-align:center;margin:.6em 0 0">히스토리 빌더 v${VERSION}</p>
+  <div style="text-align:center;margin-top:.6em"><button class="btn gold" data-close style="font-size:1.25em">확인</button></div></div>`, 'narrow');
 }
 
 // 같은 마을이 다른 곳에서 열려 있을 때 (진행이 사라지지 않게 이 화면은 멈춰요)
@@ -954,7 +968,7 @@ export function celebrate({ from, to, completed }) {
 }
 
 // ---------- 시작 화면 ----------
-export function startScreen(edit = false, onDone = null) {
+export function startScreen(edit = false, onDone = null, opt = {}) {
   const s = G.s; let av = s?.avatar || 0;
   const ov = $('overlay'); ov.classList.remove('hidden');
   ov.innerHTML = `<form class="start" id="startForm">
@@ -966,14 +980,16 @@ export function startScreen(edit = false, onDone = null) {
     <p class="muted" id="stMsg" style="margin:.2em 0 0;min-height:1.2em"></p>
     <button class="btn gold" type="submit" style="font-size:1.5em;width:100%;margin-top:.4em">${edit ? '저장하기' : '역사 마을 시작하기!'}</button>
     ${edit ? '' : `<p class="muted" style="margin:.8em 0 0">${sync.configured ? '다른 크롬북에서 하던 마을도 같은 학급 코드·번호·이름으로 들어오면 이어서 할 수 있어요.' : '다른 기기에서 하던 마을이 있으면 시작 후 ‘설정 → 백업 코드’로 불러올 수 있어요.'}</p>`}
+    ${opt.onCancel ? '<button type="button" class="st-back" id="stBack">처음 화면으로</button>' : ''}
   </form>`;
+  if (opt.onCancel) $('stBack').onclick = () => { sfx('click'); ov.classList.add('hidden'); ov.innerHTML = ''; opt.onCancel(); };
   ov.querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = Number(b.dataset.av); ov.querySelectorAll('[data-av]').forEach(x => x.classList.toggle('on', x === b)); sfx('click'); });
   $('startForm').onsubmit = e => {
     e.preventDefault();
     const profile = { studentNo: Number($('stNo').value) || 0, name: $('stName').value.trim().slice(0, 8), classCode: $('stClass').value.trim().toLowerCase().replace(/[^a-z0-9가-힣_-]/g, '').slice(0, 16), avatar: av };
     if (!profile.name || (sync.configured && !profile.classCode)) return;
     const finish = () => { ov.classList.add('hidden'); ov.innerHTML = ''; };
-    if (edit && G.s) { finish(); Object.assign(G.s, { name: profile.name, avatar: av, studentNo: sync.enabled ? G.s.studentNo : profile.studentNo, classCode: sync.enabled ? G.s.classCode : profile.classCode }); GM.save('profile'); $('avatar').src = avatarURL(av); updateHud(true); return; }
+    if (edit && G.s) { finish(); Object.assign(G.s, { name: profile.name, avatar: av, studentNo: sync.enabled ? G.s.studentNo : profile.studentNo, classCode: sync.enabled ? G.s.classCode : profile.classCode }); GM.save('profile'); $('avatar').src = avatarURL(av); updateHud(true); opt.onSaved?.(); return; }
     const btn = $('startForm').querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = '마을 찾는 중…';
     Promise.resolve(onDone?.(profile, msg => { $('stMsg').textContent = msg; $('stMsg').style.color = '#c8352b'; btn.disabled = false; btn.textContent = '역사 마을 시작하기!'; })).then(ok => { if (ok !== false) finish(); });
   };

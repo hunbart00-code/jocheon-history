@@ -13,7 +13,8 @@ import { sfx, setBgm, setSfx, unlockAudio } from './audio.js';
 import { sync } from './sync.js';
 import { preloadImages, uiImages } from './images.js';
 import { initSocial } from './social.js';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO } from './mode.js';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js';
+import * as Title from './title.js';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -294,23 +295,60 @@ function applySkins() {
   const st = document.createElement('style'); st.id = 'uiSkins'; st.textContent = css; document.head.appendChild(st);
 }
 
-// 선생님이 넣은 그림(img 폴더)을 먼저 불러온 뒤 시작
+// 선생님이 넣은 그림(img 폴더)을 먼저 불러온 뒤 첫 화면 → ‘게임 시작’
+let T = null, pendingBgm = null;
+const profileView = () => {
+  const s = G.s; if (!s || !s.name) return null;
+  const who = [s.classCode, s.studentNo ? `${s.studentNo}번` : ''].filter(Boolean).join(' · ');
+  return { label: who ? `${who} ${s.name}` : s.name, avatar: UI.avatarURL(s.avatar || 0) };
+};
+const linked = () => !!(G.s && G.s.classCode && G.s.studentNo);
+function enterGame() {
+  if (pendingBgm !== null && G.s) { G.s.settings.bgm = pendingBgm; pendingBgm = null; }
+  T?.hide(); T = null; boot();
+}
+// 학급 코드·번호·이름을 넣는 창 (처음 온 친구 · 서버에 연결되지 않았던 마을)
+function openProfileForm() {
+  T?.busy('정보를 넣어 주세요');
+  UI.startScreen(false, (profile, err) => linkProfile(profile, err).then(ok => { if (ok) enterGame(); return ok; }), { onCancel: () => T?.idle() });
+}
+async function startGame() {
+  if (G.s && linked() && sync.enabled) {
+    T?.busy('마을 불러오는 중…');
+    const cloud = await sync.fetchVillage(G.s.classCode, G.s.studentNo);
+    pickNewer(cloud);
+    sync.attach(G.s); GM.save('sync'); enterGame();
+  } else if (G.s && (linked() || !sync.enabled)) enterGame();   // 연결 안 됨: 이 기기 마을로 시작
+  else openProfileForm();
+}
+function editProfile() {
+  if (!G.s || !G.s.name) { openProfileForm(); return; }
+  UI.startScreen(true, null, { onCancel: () => {}, onSaved: () => T?.setProfile(profileView()) });
+}
+
 preloadImages().then(async n => {
   if (n) { S.clearIconCache(); UI.initIcons(); coinImg = S.iconCanvas('coin', 32); warnImg = S.iconCanvas('warn', 32); applySkins(); }
+  if (TEACHER_MODE) {
+    const online = sync.configured ? await withTimeout(sync.init(), 9000) : false;
+    if (online) sync.watchGlobal(g => UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg));
+    await teacherBoot(online); return;
+  }
+  GM.load();
+  T = Title.show({
+    version: VERSION, soundOn: !!G.s?.settings?.bgm, waitReady: sync.configured,
+    onClick: () => { unlockAudio(); sfx('click'); },
+    onSound: on => { setBgm(on); if (G.s) { G.s.settings.bgm = on; GM.save('settings'); } else pendingBgm = on; },
+    onNews: () => UI.newsModal(),
+    onProfile: editProfile,
+  });
+  T.setProfile(profileView());
+  T.setStatus(sync.configured ? 'wait' : 'local');
   const online = sync.configured ? await withTimeout(sync.init(), 9000) : false;
   if (online) sync.watchGlobal(g => UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg));
-  if (TEACHER_MODE) { await teacherBoot(online); return; }
-  if (GM.load()) {
-    if (online && G.s.classCode && G.s.studentNo) {
-      const cloud = await sync.fetchVillage(G.s.classCode, G.s.studentNo);
-      pickNewer(cloud);
-      sync.attach(G.s); GM.save('sync'); boot();
-    } else if (online) {
-      boot(); UI.startScreen(false, (profile, err) => linkProfile(profile, err).then(ok => { if (ok) { $('avatar').src = UI.avatarURL(G.s.avatar || 0); UI.updateHud(true); } return ok; }));
-    } else boot();
-  } else {
-    UI.startScreen(false, (profile, err) => linkProfile(profile, err).then(ok => { if (ok) boot(); return ok; }));
-  }
+  if (!T) return;
+  T.setStatus(online ? 'online' : sync.configured ? 'offline' : 'local');
+  T.ready(startGame);
+  if (window.__autoStart) startGame();   // 자동 시험용
 });
 
 // ---------- 선생님 테스트 마을 (?teacher=학급코드) ----------

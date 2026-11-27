@@ -623,3 +623,51 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
 .era-chip.subj-math { background: #2f6aa8; } .era-chip.subj-eng { background: #2a8a5a; }
 .qz-q .ctx { font-variant-numeric: tabular-nums; }
 .era-chip { display: inline-block; background: #7a4a24; color: #fff; border-radius: 1em; padding: 0.1em 0.7em; font-family: 'Jua', sans-serif; }
+
+/* ---------- 첫 화면 (타이틀) ---------- */
+.title { position: fixed; inset: 0; z-index: 12; background: #060920; overflow: hidden; font-family: 'Jua', sans-serif; color: #fff; --tu: min(1vh, 0.62vw); --tu: min(1dvh, 0.62vw); animation: fade 0.5s; }
+.title.out { opacity: 0; transition: opacity 0.55s; pointer-events: none; }
+.title-cv { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.t-logo { position: absolute; left: calc(var(--tu) * 2.4); top: calc(var(--tu) * 1.6); width: calc(var(--tu) * 58); filter: drop-shadow(0 calc(var(--tu) * 0.6) calc(var(--tu) * 0.8) rgba(0,0,0,0.55)); animation: t-float 5s ease-in-out infinite; pointer-events: none; }
+.t-logo svg { display: block; width: 100%; height: auto; overflow: visible; }
+.t-ver { position: absolute; right: calc(var(--tu) * 3); top: calc(var(--tu) * 2.4); font-size: calc(var(--tu) * 2.6); color: #fff; text-shadow: 0 0 0.25em #000, 0 0.08em 0 #000; letter-spacing: 0.02em; }
+.t-side { position: absolute; right: calc(var(--tu) * 3); top: calc(var(--tu) * 8); display: flex; flex-direction: column; gap: calc(var(--tu) * 1.8); }
+.t-ic { width: calc(var(--tu) * 8.4); height: calc(var(--tu) * 8.4); border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: #fff; background: rgba(8,10,28,0.55); border: calc(var(--tu) * 0.42) solid rgba(255,255,255,0.9); box-shadow: 0 0 0 calc(var(--tu) * 0.3) rgba(0,0,0,0.35), inset 0 0 calc(var(--tu) * 1.2) rgba(120,170,255,0.25); padding: 0; transition: transform 0.12s; }
+.t-ic:hover { transform: scale(1.07); background: rgba(30,40,90,0.65); }
+.t-ic:active { transform: scale(0.94); }
+.t-ic svg { width: 56%; height: 56%; }
+.t-ic .off { display: none; }
+.t-ic.muted .on { display: none; }
+.t-ic.muted .off { display: inline; }
+.t-ic.muted { color: #9aa3c0; border-color: rgba(200,205,225,0.6); }
+.t-bar { position: absolute; left: 50%; top: 71%; transform: translate(-50%, -50%); width: min(60vw, calc(var(--tu) * 90)); height: calc(var(--tu) * 7.4); display: flex; align-items: center; gap: calc(var(--tu) * 1.4); padding: 0 calc(var(--tu) * 11); font-size: calc(var(--tu) * 3.1); background: linear-gradient(90deg, transparent, rgba(8,10,30,0.8) 16%, rgba(8,10,30,0.8) 84%, transparent); }
+.t-bar::before, .t-bar::after { content: ''; position: absolute; left: 6%; right: 6%; height: max(1px, calc(var(--tu) * 0.18)); background: linear-gradient(90deg, transparent, rgba(255,224,160,0.55), transparent); }
+.t-bar::before { top: 0; } .t-bar::after { bottom: 0; }
+.t-dot { flex: none; width: 0.72em; height: 0.72em; border-radius: 50%; background: #3fd35a; box-shadow: 0 0 0.45em #3fd35a, inset 0 -0.12em 0 rgba(0,0,0,0.25); }
+.t-dot.offline, .t-dot.local { background: #f2b43a; box-shadow: 0 0 0.45em #f2b43a; }
+.t-dot.wait { background: #8a93b8; box-shadow: none; animation: blink 1s infinite; }
+.t-av { flex: none; height: 1.7em; width: 1.7em; border-radius: 0.35em; image-rendering: pixelated; background: rgba(255,255,255,0.12); border: 0.08em solid rgba(255,224,160,0.6); }
+.t-who { flex: 1; color: #ffb26a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0.08em 0 #000; }
+.t-who.new { color: #ffd98a; font-size: 0.86em; }
+.t-chg { flex: none; background: none; border: 0; color: #d6dbef; font: inherit; font-size: 0.86em; cursor: pointer; padding: 0.3em 0 0.3em 0.4em; white-space: nowrap; }
+.t-chg b { color: #fff; font-weight: normal; margin-left: 0.2em; }
+.t-chg:hover { color: #fff; }
+.t-start { position: absolute; left: 50%; top: 85%; transform: translate(-50%, -50%); isolation: isolate; background: none; border: 0; cursor: pointer; padding: calc(var(--tu) * 1.2) calc(var(--tu) * 9); font-family: 'Jua', sans-serif; font-size: calc(var(--tu) * 7); color: #fff; white-space: nowrap; letter-spacing: 0.05em; text-shadow: 0 0 0.1em #fff, 0 0 0.3em #59b6ff, 0 0 0.65em #2a7dff, 0 0.05em 0 #0b2a6e; }
+.t-start span { display: inline-block; animation: t-pulse 2.4s ease-in-out infinite; }
+.t-start::before { content: ''; position: absolute; left: -12%; right: -12%; top: 50%; height: 140%; transform: translateY(-50%); z-index: -1; background: radial-gradient(ellipse at center, rgba(90,175,255,0.5), rgba(40,105,255,0.16) 42%, transparent 70%); animation: t-pulse 2.4s ease-in-out infinite; }
+.t-start::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: 8%; height: max(2px, calc(var(--tu) * 0.3)); z-index: -1; background: linear-gradient(90deg, transparent, rgba(190,230,255,0.95), transparent); filter: blur(0.5px); }
+.t-start:hover span { transform: scale(1.04); }
+.t-start:active span { transform: scale(0.97); }
+.t-start.wait, .t-start.busy { font-size: calc(var(--tu) * 4.6); }
+.t-start.wait span, .t-start.busy span { animation: blink 1.2s infinite; }
+@keyframes t-pulse { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
+@keyframes t-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(var(--tu) * -0.6)); } }
+.title-on .overlay { background: radial-gradient(circle at 50% 45%, rgba(70,90,180,0.35), rgba(4,6,22,0.82)); }
+.title-on .modal { background: rgba(4,6,22,0.6); }
+.start .st-back { margin-top: 0.7em; background: none; border: 0; color: #7a4a24; font: inherit; font-size: 1.05em; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+.news-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55em; }
+.news-list li { display: flex; align-items: center; gap: 0.8em; background: rgba(255,255,255,0.55); border: 0.12em solid #d8bf8a; border-radius: 0.7em; padding: 0.5em 0.8em; }
+.news-list li .ico { width: 2.2em; height: 2.2em; flex: none; }
+.news-list li div { display: flex; flex-direction: column; min-width: 0; }
+.news-list li b { font-family: 'Jua'; font-weight: normal; font-size: 1.25em; color: #7a2f14; }
+.news-list li span { font-size: 1.02em; }
