@@ -7,14 +7,14 @@
 //  서버: visits/{마을}/people/{나} · visits/{마을}/game/ox · visits/{마을}/picks/{보물}
 //  무료 서버 한도를 아끼려고, 위치는 ‘방향이 바뀔 때’와 3초마다만 보내고 나머지는 예측해서 그려요
 // =============================================================
-import * as S from './sprites.js?v=202611271349';
-import { tileToWorld } from './render.js?v=202611271349';
-import { activeOffset, occupancy } from './economy.js?v=202611271349';
-import { B } from './data-buildings.js?v=202611271349';
-import { QUIZZES } from './data-quizzes.js?v=202611271349';
-import { HISTORY_ERA } from './data-config.js?v=202611271349';
-import { sync } from './sync.js?v=202611271349';
-import { badWord } from './badwords.js?v=202611271349';
+import * as S from './sprites.js?v=202611271355';
+import { tileToWorld } from './render.js?v=202611271355';
+import { activeOffset, occupancy } from './economy.js?v=202611271355';
+import { B } from './data-buildings.js?v=202611271355';
+import { QUIZZES } from './data-quizzes.js?v=202611271355';
+import { HISTORY_ERA } from './data-config.js?v=202611271355';
+import { sync } from './sync.js?v=202611271355';
+import { badWord } from './badwords.js?v=202611271355';
 
 const SPEED = 1.7;            // 걷는 빠르기 (칸/초)
 const STRIDE = 0.8;           // 두 걸음에 가는 거리 (칸)
@@ -82,8 +82,7 @@ export function startRoom(opt) {
   // ---------- OX 퀴즈 상태 ----------
   let game = null, oxQs = [], oxKey = '', oxScore = 0, oxJudged = new Set(), oxSawThink = new Set(), oxEnded = '', oxInfoKey = '';
   const oxActive = () => { if (!game) return false; const t = srv() - game.startAt; return t > -OX.lead - 3000 && t < game.n * (OX.think + OX.show) + 1500; };
-  const ghost = () => oxActive();          // 퀴즈 하는 동안은 건물 위로도 지나가요 (어느 쪽이든 갈 수 있게)
-  const free = (i, j) => inside(i, j) && (ghost() || !blocked(i, j));
+  const free = (i, j) => inside(i, j);     // 건물은 뚫고 지나가요 (건물이 많은 마을에서도 어디든 갈 수 있게), 마을 밖으로만 못 나가요
 
   // ---------- 내 캐릭터 ----------
   if (meInfo) {
@@ -353,7 +352,7 @@ export function startRoom(opt) {
       else if (free(me.i, nj)) { me.j = nj; me.vx *= 0.5; }
       else { me.vx = 0; me.vy = 0; }
       const mi = me.i - oi, mj = me.j - oj;
-      if (Math.abs(mi - mj) > 0.002) me.flip = (mi - mj) < 0;
+      if (Math.abs(mi - mj) > 0.002) me.flip = (mi - mj) > 0;      // 그림은 왼쪽을 봐요 → 오른쪽으로 갈 때만 뒤집기
       animate(me, Math.hypot(mi, mj), dt);
       stepEmo(me, dt);
       // 보내기: 방향이 바뀌거나 멈췄을 때 + 걷는 중 3초마다
@@ -380,7 +379,7 @@ export function startRoom(opt) {
         const cap = SPEED * 1.6 * dt, m = Math.hypot(mi, mj); if (m > cap) { mi *= cap / m; mj *= cap / m; }
         a.i += mi; a.j += mj;
       }
-      if (Math.abs(mi - mj) > 0.002) a.flip = (mi - mj) < 0;
+      if (Math.abs(mi - mj) > 0.002) a.flip = (mi - mj) > 0;
       animate(a, Math.hypot(mi, mj), dt);
       stepEmo(a, dt);
     }

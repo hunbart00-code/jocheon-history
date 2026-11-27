@@ -1,11 +1,11 @@
 // =============================================================
 //  아이소메트릭 마을 렌더러 (캔버스) — 카메라·확대·클릭 판정·애니메이션
 // =============================================================
-import * as S from './sprites.js?v=202611271349';
-import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271349';
-import { B, D } from './data-buildings.js?v=202611271349';
-import { H } from './data-heroes.js?v=202611271349';
-import { ERAS } from './data-config.js?v=202611271349';
+import * as S from './sprites.js?v=202611271355';
+import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271355';
+import { B, D } from './data-buildings.js?v=202611271355';
+import { H } from './data-heroes.js?v=202611271355';
+import { ERAS } from './data-config.js?v=202611271355';
 
 const ISL0 = -4, ISL1 = GRID + 3;   // 섬 범위 (타일)
 const tierOf = lv => lv >= 10 ? 2 : lv >= 5 ? 1 : 0;
@@ -127,7 +127,7 @@ export class Renderer {
       }
       const dx = p.ti - p.i, dy = p.tj - p.j, d = Math.hypot(dx, dy), sp = 0.55 * dt;
       if (d < sp) { p.i = p.ti; p.j = p.tj; p.ti = null; p.wait = 1 + Math.random() * 4; }
-      else { p.i += dx / d * sp; p.j += dy / d * sp; p.flip = (dx - dy) < 0; p.ph = (p.ph || 0) + sp * (Math.PI * 2 / 0.5); }
+      else { p.i += dx / d * sp; p.j += dy / d * sp; p.flip = (dx - dy) > 0; p.ph = (p.ph || 0) + sp * (Math.PI * 2 / 0.5); }
     }
     for (const p of this.people) p.amp = (p.amp || 0) + ((p.ti != null && p.wait <= 0 ? 1 : 0) - (p.amp || 0)) * (1 - Math.exp(-dt * 8));
   }
@@ -336,8 +336,8 @@ export class Renderer {
     g.save(); g.translate(X, Y - jump); if (o.flip) g.scale(-1, 1);
     g.imageSmoothingEnabled = true;
     // 두 다리 (몸 밑으로 조금 겹쳐 그려서 틈이 안 생겨요)
-    // 든 발은 앞으로 살짝, 디딘 발은 뒤로 살짝 (보는 쪽 = 그림의 오른쪽)
-    const fw = 0.55 * amp * big, swL = (liftL ? 1 : -0.5) * fw * Math.abs(sn), swR = (liftR ? 1 : -0.5) * fw * Math.abs(sn);
+    // 든 발은 앞으로 살짝, 디딘 발은 뒤로 살짝 (사람 그림은 왼쪽을 보고 있어요 → 앞 = 왼쪽)
+    const fw = -0.55 * amp * big, swL = (liftL ? 1 : -0.5) * fw * Math.abs(sn), swR = (liftR ? 1 : -0.5) * fw * Math.abs(sn);
     g.drawImage(img, 0, legPx - ovPx, spPx, lh, x0 + swL, y0 + (legPx - ovPx) / k - liftL, sx, lh / k);
     g.drawImage(img, spPx, legPx - ovPx, img.width - spPx, lh, x0 + sx + swR, y0 + (legPx - ovPx) / k - liftR, spr.w - sx, lh / k);
     // 몸 (엉덩이를 축으로)
