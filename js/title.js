@@ -3,8 +3,8 @@
 //  섬 왼쪽(선사)에서 오른쪽(외계)으로 시대가 흘러요. 길을 걷는 주민은 걸어가며 옷이 바뀌고
 //  마지막엔 별의 문으로 들어가요. 그림은 게임 안 건물·주민 그림을 밤 색으로 물들여 써요.
 // =============================================================
-import * as S from './sprites.js?v=202611271115';
-import { getImage } from './images.js?v=202611271115';
+import * as S from './sprites.js?v=202611271127';
+import { getImage } from './images.js?v=202611271127';
 
 const N = 5;
 const PAST = 'warm', NOW = 'cool', SPACE = 'cool', ALIEN = 'alien';
@@ -156,7 +156,8 @@ function buildSky(W, H, p) {
   const gr = g.createLinearGradient(0, 0, 0, H * 0.7);
   gr.addColorStop(0, '#060920'); gr.addColorStop(0.4, '#101a48'); gr.addColorStop(0.78, '#2a2868'); gr.addColorStop(1, '#4b3876');
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
-  const mx = W * 0.39, my = H * 0.13;
+  const tu = Math.min(H / 100, W * 0.0062);                 // 로고 크기 단위(--tu)와 같은 계산
+  const mx = Math.max(W * 0.355, tu * 61 + 13 * p), my = H * 0.13;   // 달은 늘 로고 오른쪽에
   const mg = g.createRadialGradient(mx, my, 0, mx, my, H * 0.3);
   mg.addColorStop(0, 'rgba(255,236,190,0.28)'); mg.addColorStop(0.3, 'rgba(255,236,190,0.08)'); mg.addColorStop(1, 'rgba(255,236,190,0)');
   g.fillStyle = mg; g.fillRect(0, 0, W, H);
@@ -275,7 +276,7 @@ function layout() {
   W = Math.round(innerWidth * dpr); H = Math.round(innerHeight * dpr);
   cv.width = W; cv.height = H;
   k = Math.min(H / 430, W / 770); p = Math.max(2, Math.round(k * 2.2));
-  IX = W * 0.555; IY = H * 0.4;
+  IX = W * 0.5; IY = H * 0.4;          // 섬은 화면 한가운데 (이름 줄·게임 시작과 같은 세로선)
   if (!GLOW.warm) { GLOW.warm = glowCanvas('255,178,96'); GLOW.cool = glowCanvas('120,210,255'); GLOW.alien = glowCanvas('200,120,255'); GLOW.moon = glowCanvas('255,240,200'); }
   const fg = buildFg(W, H, p);
   L = {

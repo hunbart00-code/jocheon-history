@@ -1,11 +1,11 @@
 // =============================================================
 //  경제 엔진 — 순수 계산 함수 모음 (게임과 밸런스 시뮬레이터가 함께 사용)
 // =============================================================
-import { ERAS, BAL, EXPAND, MAX_ERA } from './data-config.js?v=202611271115';
-import { B, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271115';
-import { H } from './data-heroes.js?v=202611271115';
-import { T } from './data-techs.js?v=202611271115';
-import { RELICS, R } from './data-relics.js?v=202611271115';
+import { ERAS, BAL, EXPAND, MAX_ERA } from './data-config.js?v=202611271127';
+import { B, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271127';
+import { H } from './data-heroes.js?v=202611271127';
+import { T } from './data-techs.js?v=202611271127';
+import { RELICS, R } from './data-relics.js?v=202611271127';
 
 export const GRID = 10;   // v1.7: 8 → 10 (예전 저장의 건물 좌표는 game.js migrate 에서 +1 옮겨요)
 

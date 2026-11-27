@@ -707,7 +707,7 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
 @keyframes t-in-right { from { translate: 180% 0; opacity: 0; } }
 @keyframes hb-fadein { from { opacity: 0; } }
 /* 첫 화면 → 마을: 로고는 위로, 버튼은 아래로 빠지고 섬 쪽으로 다가가며 디졸브 */
-.title.out { pointer-events: none; transform-origin: 55% 42%; animation: t-out 0.95s cubic-bezier(.55,0,.6,1) forwards; }
+.title.out { pointer-events: none; transform-origin: 50% 42%; animation: t-out 0.95s cubic-bezier(.55,0,.6,1) forwards; }
 .title.out .t-logo { animation: t-to-top 0.4s ease-in forwards; }
 .title.out .t-side, .title.out .t-ver { animation: t-to-right 0.35s ease-in forwards; }
 .title.out .t-bar { animation: t-to-bottom 0.4s ease-in forwards; }
