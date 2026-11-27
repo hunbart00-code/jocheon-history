@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>히스토리 빌더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="rotate" id="rotate" role="alert"><div class="phone" aria-hidden="true"></div><b>휴대폰을 가로로 돌려 주세요</b><p>히스토리 빌더는 가로 화면에서 할 수 있어요.<br>화면 자동 회전이 꺼져 있다면 켜 주세요.</p><button id="rotateGo" class="hidden">가로 전체 화면으로 하기</button></div>
+<div id="app">
+  <canvas id="world"></canvas>
+
+  <!-- 상단 HUD -->
+  <header class="hud-top">
+    <div class="ribbon" id="ribbon"><span id="eraNum">1단계</span>
+      <svg class="taegeuk" viewBox="-50 -50 100 100" aria-hidden="true"><circle r="49" fill="#f7cf4a"/><g transform="rotate(33.7)"><circle r="44" fill="#1f4fa3"/><path d="M-44,0 A44,44 0 0 1 44,0 A22,22 0 0 1 0,0 A22,22 0 0 0 -44,0Z" fill="#d42e34"/></g></svg></div>
+    <div class="col">
+      <div class="panel era-name"><span id="eraName">고조선·선사</span></div>
+      <div class="panel player" id="btnProfile">
+        <img id="avatar" alt="">
+        <div><small id="pNo">출석번호 0번</small><b id="pName">이름</b></div>
+      </div>
+    </div>
+    <div class="gold-wrap">
+      <button class="panel gold" id="btnGold" title="창고의 엽전 거두기">
+        <img class="ico" data-icon="coin" alt=""><span id="gold">0</span>
+      </button>
+      <div class="panel rate">
+        <span id="rate">+0/초</span>
+        <div class="store" title="창고"><i id="storeBar"></i><em id="storeTxt">창고 0%</em></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="panel kp"><img class="ico" data-icon="kp" alt=""><span id="kp">0 KP</span></div>
+      <div class="panel fame" id="btnFame" title="역사 명성 · 누르면 랭킹"><img class="ico" data-icon="star" alt=""><span id="fame">0</span></div>
+      <button class="panel gear save-btn" id="btnSave" title="지금 학급 서버에 저장"><img class="ico" data-icon="save" alt=""><i class="save-dot" id="saveDot"></i><em class="save-lb" id="saveLb">저장</em></button>
+      <button class="panel gear" id="btnSettings" title="설정"><img class="ico" data-icon="gear" alt=""></button>
+    </div>
+  </header>
+
+  <!-- 왼쪽 도구 -->
+  <nav class="side-tools">
+    <button class="tool" id="btnLab"><span class="t-ic"><img class="ico" data-icon="flask" alt=""></span><span class="t-lb">연구소</span></button>
+    <button class="tool" id="btnWonder"><span class="t-ic"><img class="ico" data-icon="museum" alt=""></span><span class="t-lb">대역사</span></button>
+    <button class="tool" id="btnRecord"><span class="t-ic"><img class="ico" data-icon="trophy" alt=""></span><span class="t-lb">내 기록</span></button>
+    <button class="tool rank" id="btnRank"><span class="t-ic"><img class="ico" data-icon="crown" alt=""></span><span class="t-lb">랭킹</span></button>
+    <button class="tool chat" id="btnChat"><span class="t-ic"><img class="ico" data-icon="chat" alt=""></span><span class="t-lb">채팅</span><em class="t-badge hidden" id="chatBadge">0</em></button>
+  </nav>
+
+  <!-- 학급 채팅 -->
+  <section class="chat-panel hidden" id="chatPanel">
+    <header><img class="ico" data-icon="chat" alt=""><b id="chatHead">우리 반 채팅</b><button id="chatX" aria-label="채팅 닫기">✕</button></header>
+    <div class="chat-list" id="chatList"></div>
+    <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="60" placeholder="고운 말로 이야기해요 (60자)"><button class="btn green" type="submit">보내기</button></form>
+    <p class="chat-note">선생님도 볼 수 있어요 · 욕설과 개인 정보는 보낼 수 없어요</p>
+  </section>
+
+  <!-- 오른쪽 시대 돌파 게이지 -->
+  <aside class="gauge">
+    <button class="panel g-title" id="btnConds">시대 돌파<br>조건</button>
+    <div class="tube" id="tube"><i id="gaugeFill"></i><b id="gaugeTxt">0/0</b></div>
+    <button class="challenge" id="btnChallenge">도전하기</button>
+    <div class="zoom"><button id="zoomIn" title="확대" aria-label="확대"><i></i><i></i></button><button id="zoomOut" title="축소" aria-label="축소"><i></i></button></div>
+
+  </aside>
+
+  <!-- 다음 목표 안내 -->
+  <div class="goal" id="goal"><img class="ico" data-icon="star" alt=""><span id="goalTxt"></span></div>
+
+  <!-- 하단 버튼 -->
+  <footer class="bottom">
+    <button class="big red" id="btnQuiz">
+      <span class="flames" id="flames"></span>
+      <img class="ico" data-icon="book" alt="">
+      <span class="lbl"><b>★ 퀴즈 풀기</b><small>(KP 획득)</small></span>
+      <em class="combo-badge" id="comboBadge"></em>
+    </button>
+    <button class="big blue" id="btnBuild">
+      <span class="two"><img class="ico" data-icon="hammer" alt=""><img class="ico" data-icon="house" alt=""></span>
+      <span class="lbl"><b>건설 / 상점</b></span>
+    </button>
+    <button class="big blue" id="btnHeroes">
+      <img class="ico" data-icon="chest" alt="">
+      <span class="lbl"><b>유물 &amp; 위인</b></span>
+    </button>
+    <button class="big green" id="btnFriends">
+      <img class="ico" data-icon="people" alt="">
+      <span class="lbl"><b>친구 마을 방문</b></span>
+    </button>
+  </footer>
+
+  <!-- 배치 모드 안내 -->
+  <div class="place-bar hidden" id="placeBar"><span id="placeTxt"></span><button id="placeCancel">취소</button></div>
+  <!-- 건물 정보 -->
+  <div class="b-panel hidden" id="bPanel"></div>
+  <!-- 피버 -->
+  <div class="fever hidden" id="fever"><b>피버!</b> 엽전 2배 <i id="feverBar"></i></div>
+
+  <div class="modal hidden" id="modal"><div class="sheet" id="sheet"></div></div>
+  <div class="overlay hidden" id="overlay"></div>
+  <div class="war-alert hidden" id="warAlert"></div>
+  <div id="toasts"></div>
+  <div id="floaters"></div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

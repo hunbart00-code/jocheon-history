@@ -1,0 +1,136 @@
+// =============================================================
+//  유물 35종 (시대별 5종) — rarity: common 일반 / rare 희귀 / treasure 보물급 / national 국보급
+//  같은 시대 5종을 모두 모으면 '시대 세트 버프' (그 시대 건물 수익 +50%)
+//  icon: 도트 아이콘 모양 (sprites.js drawRelicIcon), c: 주 색상
+// =============================================================
+export const RARITY = {
+  common:   { name: '일반',   color: '#9aa3ad', order: 0 },
+  rare:     { name: '희귀',   color: '#3d8fe0', order: 1 },
+  treasure: { name: '보물급', color: '#b05ae0', order: 2 },
+  national: { name: '국보급', color: '#f2b234', order: 3 },
+};
+
+export const RELICS = [
+  // 1단계
+  { id: 'r1_1', era: 1, rarity: 'common', name: '주먹도끼', icon: 'handaxe', c: '#9b8b74',
+    desc: '구석기 사람들이 사냥하고 땅을 팔 때 쓴 뗀석기예요. 경기도 연천 전곡리에서 발견되었어요.' },
+  { id: 'r1_2', era: 1, rarity: 'common', name: '빗살무늬 토기', icon: 'combpot', c: '#a86b45',
+    desc: '신석기 시대의 대표 토기예요. 바닥이 뾰족해 모래땅에 꽂아 썼어요.' },
+  { id: 'r1_3', era: 1, rarity: 'rare', name: '반달 돌칼', icon: 'halfmoon', c: '#8f9a9c',
+    desc: '청동기 시대에 곡식의 이삭을 자르던 간석기예요.' },
+  { id: 'r1_4', era: 1, rarity: 'treasure', name: '비파형 동검', icon: 'dagger', c: '#5aa58c',
+    desc: '악기 비파를 닮은 청동 칼로, 고조선의 대표 유물이에요.' },
+  { id: 'r1_5', era: 1, rarity: 'national', name: '잔무늬 청동 거울', icon: 'mirror', c: '#4f9c86',
+    desc: '머리카락처럼 가는 선이 1만 개 넘게 새겨진 청동기 시대의 걸작이에요(다뉴세문경).' },
+  // 2단계
+  { id: 'r2_1', era: 2, rarity: 'common', name: '가야 철갑옷', icon: 'armor', c: '#6e737a',
+    desc: '가야는 질 좋은 철을 많이 만들어 이웃 나라와 왜에 수출했어요.' },
+  { id: 'r2_2', era: 2, rarity: 'common', name: '기마 인물형 토기', icon: 'horse', c: '#8a7f6e',
+    desc: '말을 탄 사람 모양의 신라 토기예요. 경주 금령총에서 나왔어요.' },
+  { id: 'r2_3', era: 2, rarity: 'rare', name: '칠지도', icon: 'sevensword', c: '#7d8792',
+    desc: '백제가 왜에 보낸 가지 7개 달린 칼이에요. 백제와 왜의 교류를 보여 줘요.' },
+  { id: 'r2_4', era: 2, rarity: 'treasure', name: '신라 금관', icon: 'crown', c: '#f0c23a',
+    desc: '나뭇가지와 사슴뿔 모양 장식이 달린 신라의 금관이에요.' },
+  { id: 'r2_5', era: 2, rarity: 'national', name: '백제 금동대향로', icon: 'incense', c: '#d9a93a',
+    desc: '부여에서 발견된 향로로, 봉황과 신선 세계가 새겨진 백제 예술의 걸작이에요.' },
+  // 3단계
+  { id: 'r3_1', era: 3, rarity: 'common', name: '주령구', icon: 'dice', c: '#b98a55',
+    desc: '신라 사람들이 놀이할 때 쓴 14면 주사위예요. 경주 월지(안압지)에서 발견되었어요.' },
+  { id: 'r3_2', era: 3, rarity: 'common', name: '발해 치미', icon: 'chimi', c: '#5e8a6e',
+    desc: '지붕 용마루 끝을 장식한 큰 기와예요. 발해 상경성 터에서 나왔어요.' },
+  { id: 'r3_3', era: 3, rarity: 'rare', name: '이불병좌상', icon: 'buddha', c: '#c8a24a',
+    desc: '두 부처가 나란히 앉은 발해의 불상으로, 고구려 문화를 이었음을 보여 줘요.' },
+  { id: 'r3_4', era: 3, rarity: 'treasure', name: '무구정광대다라니경', icon: 'scroll', c: '#e3d2a4',
+    desc: '석가탑에서 발견된, 현재 남아 있는 세계에서 가장 오래된 목판 인쇄물이에요.' },
+  { id: 'r3_5', era: 3, rarity: 'national', name: '성덕대왕 신종', icon: 'bell', c: '#4f8c7a',
+    desc: '에밀레종이라고도 불리는 신라의 큰 종으로, 맑고 긴 울림으로 유명해요.' },
+  // 4단계
+  { id: 'r4_1', era: 4, rarity: 'common', name: '해동통보', icon: 'coin', c: '#b8873a',
+    desc: '고려 숙종 때 만든 동전이에요.' },
+  { id: 'r4_2', era: 4, rarity: 'common', name: '나전 경함', icon: 'box', c: '#3a2a2a',
+    desc: '조개껍데기를 오려 붙여 장식한 고려의 나전칠기 상자예요.' },
+  { id: 'r4_3', era: 4, rarity: 'rare', name: '팔만대장경 경판', icon: 'woodblock', c: '#8a5a33',
+    desc: '8만 장이 넘는 나무판에 불경을 새겼어요. 유네스코 세계기록유산이에요.' },
+  { id: 'r4_4', era: 4, rarity: 'treasure', name: '직지심체요절', icon: 'book', c: '#d8c79c',
+    desc: '1377년 청주 흥덕사에서 금속 활자로 찍은, 현존하는 가장 오래된 금속 활자본이에요.' },
+  { id: 'r4_5', era: 4, rarity: 'national', name: '청자 상감운학문 매병', icon: 'maebyeong', c: '#8fc2ad',
+    desc: '구름과 학 무늬를 상감 기법으로 새긴 고려청자의 걸작이에요.' },
+  // 5단계
+  { id: 'r5_1', era: 5, rarity: 'common', name: '분청사기', icon: 'buncheong', c: '#9a9488',
+    desc: '회색 그릇에 흰 흙을 발라 만든 조선 초기의 도자기예요.' },
+  { id: 'r5_2', era: 5, rarity: 'common', name: '신기전', icon: 'rocket', c: '#a0522d',
+    desc: '화약의 힘으로 날아가는 조선의 로켓 무기예요.' },
+  { id: 'r5_3', era: 5, rarity: 'rare', name: '앙부일구', icon: 'sundial', c: '#c0903a',
+    desc: '솥을 닮은 해시계로, 그림자로 시각과 계절을 알 수 있었어요.' },
+  { id: 'r5_4', era: 5, rarity: 'treasure', name: '측우기', icon: 'raingauge', c: '#5c7d99',
+    desc: '세종 때 만든, 비가 내린 양을 재는 기구예요.' },
+  { id: 'r5_5', era: 5, rarity: 'national', name: '훈민정음 해례본', icon: 'hunmin', c: '#e0cf9e',
+    desc: '한글을 만든 원리와 쓰는 법을 설명한 책이에요. 유네스코 세계기록유산이에요.' },
+  // 6단계
+  { id: 'r6_1', era: 6, rarity: 'common', name: '상평통보', icon: 'coin', c: '#8c6b3a',
+    desc: '조선 후기 전국에서 널리 쓰인 동전이에요.' },
+  { id: 'r6_2', era: 6, rarity: 'common', name: '거중기 설계도', icon: 'blueprint', c: '#3d6fa8',
+    desc: '정약용이 만든 거중기는 무거운 돌을 적은 힘으로 들어 올렸어요.' },
+  { id: 'r6_3', era: 6, rarity: 'rare', name: '백자 달항아리', icon: 'moonjar', c: '#f3f0e6',
+    desc: '보름달처럼 둥글고 흰 조선 후기의 백자 항아리예요.' },
+  { id: 'r6_4', era: 6, rarity: 'treasure', name: '김홍도 풍속화첩', icon: 'painting', c: '#d9c9a0',
+    desc: '씨름, 서당 등 서민의 생활 모습을 그린 그림책이에요.' },
+  { id: 'r6_5', era: 6, rarity: 'national', name: '대동여지도', icon: 'map', c: '#d6c28f',
+    desc: '김정호가 만든 큰 지도로, 22첩으로 접고 펼 수 있었어요.' },
+  // 7단계
+  { id: 'r7_1', era: 7, rarity: 'common', name: '문위우표', icon: 'stamp', c: '#d4544a',
+    desc: '1884년 우정총국이 처음 발행한 우리나라 최초의 우표예요.' },
+  { id: 'r7_2', era: 7, rarity: 'common', name: '독립신문', icon: 'newspaper', c: '#ece6d6',
+    desc: '1896년 서재필 등이 만든 신문으로, 한글판과 영문판이 있었어요.' },
+  { id: 'r7_3', era: 7, rarity: 'rare', name: '태극기', icon: 'flag', c: '#ffffff',
+    desc: '독립운동가들은 태극기를 들고 독립 만세를 외쳤어요.' },
+  { id: 'r7_4', era: 7, rarity: 'treasure', name: '3·1 독립 선언서', icon: 'declaration', c: '#efe7cf',
+    desc: '1919년 민족 대표 33인의 이름으로 발표한 독립 선언서예요.' },
+  { id: 'r7_5', era: 7, rarity: 'national', name: '백범일지', icon: 'book', c: '#4a6b8a',
+    desc: '김구가 쓴 자서전이에요. ‘나의 소원’에서 문화의 힘이 강한 나라를 꿈꿨어요.' },
+];
+
+// ---- v1.7: 8~10단계 유물 (시대마다 6종) ----
+RELICS.push(
+  // 8단계 현대 대한민국
+  { id: 'r8_1', era: 8, rarity: 'common', name: '서울 올림픽 굴렁쇠', icon: 'hoop', c: '#d9d9d9',
+    desc: '1988년 서울 올림픽 개막식에서 한 어린이가 넓은 경기장을 굴렁쇠를 굴리며 가로질러 세계를 감동시켰어요.' },
+  { id: 'r8_2', era: 8, rarity: 'common', name: '옛날 휴대 전화', icon: 'phone', c: '#3a3f46',
+    desc: '처음 나온 휴대 전화는 벽돌처럼 크고 무거웠어요. 지금은 손바닥만 한 스마트폰으로 세계와 연결돼요.' },
+  { id: 'r8_3', era: 8, rarity: 'rare', name: '첫 국산 자동차 모형', icon: 'car', c: '#3d8fe0',
+    desc: '1970년대 우리 기술로 만든 고유 모델 자동차가 처음 나왔어요. 지금 우리나라는 자동차를 세계에 수출해요.' },
+  { id: 'r8_4', era: 8, rarity: 'rare', name: '반도체 웨이퍼', icon: 'wafer', c: '#9fb4d9',
+    desc: '얇고 동그란 실리콘 판 위에 아주 작은 회로를 새겨 반도체를 만들어요. 무지갯빛으로 반짝여요.' },
+  { id: 'r8_5', era: 8, rarity: 'treasure', name: '2002 월드컵 축구공', icon: 'ball', c: '#f4f4f4',
+    desc: '2002년 우리나라와 일본이 함께 월드컵을 열었어요. 우리나라는 4강에 올라 온 국민이 함께 응원했어요.' },
+  { id: 'r8_6', era: 8, rarity: 'national', name: '평창 동계 올림픽 메달', icon: 'medal', c: '#f2c230',
+    desc: '2018년 강원도 평창에서 동계 올림픽이 열렸어요. 하계·동계 올림픽을 모두 연 나라가 되었어요.' },
+  // 9단계 우주 시대
+  { id: 'r9_1', era: 9, rarity: 'common', name: '운석 조각', icon: 'meteor', c: '#6e5a4a',
+    desc: '우주를 떠돌던 돌이 지구에 떨어진 것을 운석이라고 해요. 태양계가 처음 생길 때의 비밀을 품고 있어요.' },
+  { id: 'r9_2', era: 9, rarity: 'common', name: '우주인 헬멧', icon: 'spacehelm', c: '#f4f4f4',
+    desc: '우주에는 숨 쉴 공기가 없어서 우주인은 산소를 넣어 주는 헬멧과 우주복을 입어요.' },
+  { id: 'r9_3', era: 9, rarity: 'rare', name: '우리별 1호 모형', icon: 'satellite', c: '#c9a24a',
+    desc: '1992년 발사된 우리나라 최초의 인공위성이에요. 우리나라 우주 개발의 첫걸음이었어요.' },
+  { id: 'r9_4', era: 9, rarity: 'rare', name: '누리호 모형', icon: 'rocket2', c: '#f4f4f4',
+    desc: '우리 기술로 만든 우주 발사체예요. 2022년 2차 발사에서 위성을 우주 궤도에 올리는 데 성공했어요.' },
+  { id: 'r9_5', era: 9, rarity: 'treasure', name: '다누리가 찍은 달 사진', icon: 'moonphoto', c: '#b8b8c8',
+    desc: '2022년 발사한 우리나라 첫 달 탐사선 다누리는 달 둘레를 돌며 달 표면을 촬영하고 있어요.' },
+  { id: 'r9_6', era: 9, rarity: 'national', name: '달의 돌', icon: 'moonrock', c: '#9a9aa8',
+    desc: '달에 다녀온 우주인들이 가져온 돌이에요. 달이 어떻게 생겨났는지 알려 주는 귀한 자료예요.' },
+  // 10단계 외계 시대 (상상의 유물)
+  { id: 'r10_1', era: 10, rarity: 'common', name: '빛나는 외계 수정', icon: 'crystal', c: '#7af0e0',
+    desc: '외계 행성에서 온 수정이에요. 어두운 곳에서 은은하게 빛나요. (상상의 유물)' },
+  { id: 'r10_2', era: 10, rarity: 'common', name: '외계 식물 씨앗', icon: 'seed', c: '#b05ae0',
+    desc: '물 대신 별빛을 먹고 자라는 신기한 씨앗이에요. (상상의 유물)' },
+  { id: 'r10_3', era: 10, rarity: 'rare', name: '은하 지도', icon: 'galaxymap', c: '#2a1a5a',
+    desc: '수천 개의 별과 행성 사이 길이 그려진 지도예요. 대동여지도처럼 접고 펼 수 있어요. (상상의 유물)' },
+  { id: 'r10_4', era: 10, rarity: 'rare', name: '만능 번역기', icon: 'translator', c: '#5ab0e8',
+    desc: '외계어를 한글로 바꿔 주는 기계예요. 처음 번역된 낱말은 ‘친구’였대요. (상상의 유물)' },
+  { id: 'r10_5', era: 10, rarity: 'treasure', name: '반중력 돌', icon: 'floatstone', c: '#6a5acd',
+    desc: '손을 놓아도 공중에 둥둥 떠 있는 돌이에요. 공중 정원의 비밀이 여기에 있어요. (상상의 유물)' },
+  { id: 'r10_6', era: 10, rarity: 'national', name: '은하 평화 조약', icon: 'treaty', c: '#efe7cf',
+    desc: '지구와 은하 연합이 싸우지 않고 서로 돕기로 약속한 문서예요. 마지막에 우리 반 이름이 적혀 있어요. (상상의 유물)' },
+);
+
+export const R = Object.fromEntries(RELICS.map(r => [r.id, r]));
