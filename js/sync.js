@@ -6,7 +6,7 @@
 //   chats/{학급코드}/msgs/{자동}: 학급 채팅 (최근 50개만 구독)
 //  firebase-config.js 의 apiKey 가 비어 있으면 아무것도 하지 않습니다(로컬 모드).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271205';
+import { firebaseConfig } from './firebase-config.js?v=202611271212';
 
 const V = '10.12.2';
 const CDN = `https://www.gstatic.com/firebasejs/${V}/`;
@@ -64,7 +64,7 @@ export const sync = {
     // v1.7부터는 config/server (config/global 은 옛 주소(Netlify) 게임을 닫는 안내용)
     this._unsubG = F.onSnapshot(F.doc(db, 'config', 'server'), snap => {
       const d = snap.exists() ? snap.data() : {};
-      this.global = { closed: !!d.closed, msg: d.msg || '' };
+      this.global = { closed: !!d.closed, msg: d.msg || '', reloadAt: d.reloadAt || 0 };
       cb?.(this.global);
     }, e => console.warn(e));
   },

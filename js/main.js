@@ -1,21 +1,21 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271205';
-import { G } from './game.js?v=202611271205';
-import * as UI from './ui.js?v=202611271205';
-import { ctx } from './ui.js?v=202611271205';
-import { Renderer } from './render.js?v=202611271205';
-import * as S from './sprites.js?v=202611271205';
-import * as E from './economy.js?v=202611271205';
-import { B, D } from './data-buildings.js?v=202611271205';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271205';
-import { sync } from './sync.js?v=202611271205';
-import { preloadImages, uiImages } from './images.js?v=202611271205';
-import { initSocial } from './social.js?v=202611271205';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271205';
-import * as Title from './title.js?v=202611271205';
-import * as FS from './fullscreen.js?v=202611271205';
+import * as GM from './game.js?v=202611271212';
+import { G } from './game.js?v=202611271212';
+import * as UI from './ui.js?v=202611271212';
+import { ctx } from './ui.js?v=202611271212';
+import { Renderer } from './render.js?v=202611271212';
+import * as S from './sprites.js?v=202611271212';
+import * as E from './economy.js?v=202611271212';
+import { B, D } from './data-buildings.js?v=202611271212';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271212';
+import { sync } from './sync.js?v=202611271212';
+import { preloadImages, uiImages } from './images.js?v=202611271212';
+import { initSocial } from './social.js?v=202611271212';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271212';
+import * as Title from './title.js?v=202611271212';
+import * as FS from './fullscreen.js?v=202611271212';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -246,6 +246,28 @@ sync.onRemote = doc => {
 sync.onClass = c => { if (G.s?.teacher) { UI.showPaused(false); return; } UI.showPaused(c.paused, c.notice); };
 const withTimeout = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() => r(false), ms))]);
 
+// ---------- 선생님이 ‘모든 학생 새로고침’을 누르면 → 저장하고 새 버전으로 ----------
+// 처음 받은 값은 기준으로만 쓰고, 그 뒤에 값이 바뀔 때만 새로고침해요 (크롬북 시계가 달라도 괜찮아요)
+let firstReloadAt = null, updating = false;
+function onGlobal(g) {
+  UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg);
+  const r = g.reloadAt || 0;
+  if (firstReloadAt === null) { firstReloadAt = r; return; }
+  if (r > firstReloadAt && !updating) { updating = true; updateToNew(r); }
+}
+async function updateToNew(stamp) {
+  const bar = document.createElement('div'); bar.className = 'upd-banner'; document.body.appendChild(bar);
+  const say = t => { bar.innerHTML = `<i></i><span>${t}</span>`; };
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const t0 = Date.now();
+  while (UI.isQuizBusy() && Date.now() - t0 < 90000) { say('선생님이 새 버전으로 바꿔요! 지금 푸는 문제를 마치면 바뀌어요'); await sleep(1000); }
+  for (let k = 3; k > 0; k--) { say(`선생님이 새 버전으로 바꿔요! 저장하고 ${k}초 뒤 새로고침해요`); await sleep(1000); }
+  if (!T && G.s) { GM.save('close'); await withTimeout(sync.saveNow(G.s), 5000); }
+  say('새 버전을 불러오는 중…');
+  const u = new URL(location.href); u.searchParams.set('v', String(stamp));   // 주소를 바꿔서 예전 파일 대신 새 파일을 받아요
+  location.replace(u.toString());
+}
+
 // 이 기기의 마을과 서버의 마을 중 ‘더 많이 진행한 쪽’을 남겨요 (시대 → 푼 문제 → 플레이 시간)
 // 예전에는 ‘더 늦게 저장된 쪽’을 골라서, 오래 켜 둔 다른 크롬북이 앞선 진행을 덮어쓰는 일이 있었어요.
 function pickNewer(cloud) {
@@ -355,7 +377,7 @@ preloadImages().then(async n => {
   if (n) { S.clearIconCache(); UI.initIcons(); coinImg = S.iconCanvas('coin', 32); warnImg = S.iconCanvas('warn', 32); applySkins(); }
   if (TEACHER_MODE) {
     const online = sync.configured ? await withTimeout(sync.init(), 9000) : false;
-    if (online) sync.watchGlobal(g => UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg));
+    if (online) sync.watchGlobal(onGlobal);
     await teacherBoot(online); Title.hideSplash(); return;
   }
   GM.load();
@@ -370,7 +392,7 @@ preloadImages().then(async n => {
   T.setProfile(profileView());
   T.setStatus(sync.configured ? 'wait' : 'local');
   const online = sync.configured ? await withTimeout(sync.init(), 9000) : false;
-  if (online) sync.watchGlobal(g => UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg));
+  if (online) sync.watchGlobal(onGlobal);
   if (!T) return;
   T.setStatus(online ? 'online' : sync.configured ? 'offline' : 'local');
   T.ready(startGame);

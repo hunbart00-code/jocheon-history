@@ -108,6 +108,11 @@
         <button class="btn red" id="btnServer" style="font-size:17px;padding:9px 18px">서버 닫기</button>
       </div>
       <p class="note" style="margin:8px 0 0">닫으면 학생 화면이 ‘문을 닫았어요’로 바뀌고 수익·저장·채팅이 모두 멈춰요. 다시 열면 그대로 이어서 해요. 선생님 테스트 마을은 닫혀도 쓸 수 있어요.</p>
+      <div class="srv" style="margin-top:12px;padding-top:12px;border-top:1px dashed #d8bf8a">
+        <div class="srv-state"><b style="font-size:18px;color:#2f6aa8">새 버전 적용</b><span class="dim" id="updSub">게임을 새로 고쳐 올렸을 때 눌러요.</span></div>
+        <button class="btn blue" id="btnUpdate" style="font-size:16px;padding:9px 16px">모든 학생 새로고침</button>
+      </div>
+      <p class="note" style="margin:6px 0 0">게임을 켜 놓은 학생 화면이 저장한 뒤 새 버전으로 바뀌어요. 퀴즈나 전투를 푸는 중이면 다 푼 뒤에 바뀌어요. 진행은 그대로 이어져요.</p>
     </section>
 
     <section class="card">
@@ -164,6 +169,6 @@
 <div class="bk-modal hidden" id="bkModal"><div class="card bk-card"><h2>저장 기록 — <span id="bkName"></span><button class="btn small gray" style="margin-left:auto" onclick="document.getElementById('bkModal').classList.add('hidden')">닫기</button></h2>
   <p class="note" style="margin-top:0">진행이 갑자기 되돌아간 학생은 여기서 앞선 기록을 골라 되돌릴 수 있어요. 기록은 학생이 ‘저장’ 버튼을 누를 때와 시대를 돌파할 때 남아요.</p>
   <div class="tbl" id="bkBox"></div></div></div>
-<script type="module" src="js/admin.js?v=202611271205"></script>
+<script type="module" src="js/admin.js?v=202611271212"></script>
 </body>
 </html>

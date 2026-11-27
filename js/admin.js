@@ -5,9 +5,9 @@
 //   chats/{학급코드}/msgs : 최근 50개 보기 · 지우기
 //  누가 선생님인지는 Firestore 보안 규칙이 정해요 (teacher/check 문서를 읽을 수 있으면 선생님).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271205';
-import { ERAS, MAX_ERA } from './data-config.js?v=202611271205';
-import { badWord } from './badwords.js?v=202611271205';
+import { firebaseConfig } from './firebase-config.js?v=202611271212';
+import { ERAS, MAX_ERA } from './data-config.js?v=202611271212';
+import { badWord } from './badwords.js?v=202611271212';
 
 const CDN = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const $ = id => document.getElementById(id);
@@ -80,6 +80,11 @@ function load(raw) {
 function watchServer() {
   F.onSnapshot(F.doc(db, 'config', 'server'), snap => { glob = snap.exists() ? snap.data() : {}; drawServer(); }, e => console.warn(e));
   F.onSnapshot(F.doc(db, 'config', 'global'), snap => { oldSite = snap.exists() ? snap.data() : {}; drawOldSite(); }, e => console.warn(e));
+  $('btnUpdate').onclick = async () => {
+    if (!confirm('게임을 켜 놓은 모든 학생 화면을 새 버전으로 새로고침할까요?\n(저장한 뒤 바뀌고, 진행은 그대로 이어져요)')) return;
+    try { await F.setDoc(F.doc(db, 'config', 'server'), { reloadAt: Date.now() }, { merge: true }); toast('모든 학생 화면에 새로고침 신호를 보냈어요'); }
+    catch (e) { console.warn(e); toast('보내지 못했어요. 선생님 계정을 확인해 주세요.'); }
+  };
   $('btnServer').onclick = async () => {
     const closing = !glob.closed;
     if (closing && !confirm('서버를 닫을까요?\n모든 학생 화면이 ‘문을 닫았어요’로 바뀌어요.')) return;
@@ -112,6 +117,7 @@ function drawServer() {
   $('btnServer').textContent = c ? '서버 열기' : '서버 닫기';
   $('btnServer').className = `btn ${c ? 'green' : 'red'}`;
   if (document.activeElement !== $('srvMsg')) $('srvMsg').value = glob.msg || '';
+  if ($('updSub')) $('updSub').textContent = glob.reloadAt ? `마지막으로 보낸 때: ${new Date(glob.reloadAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : '게임을 새로 고쳐 올렸을 때 눌러요.';
 }
 
 // ---------- 수업 제어 ----------
