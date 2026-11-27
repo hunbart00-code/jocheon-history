@@ -132,9 +132,20 @@ const CAT_NAME = { animal: '동물', food: '음식', color: '색깔', family: '�
 const shuffleBy = (arr, seed) => { const a = [...arr]; let s = seed * 9301 + 49297; for (let i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const sameCat = (i, n) => { const c = WORDS[i][3].replace('act2', 'act'); const pool = WORDS.map((w, k) => k).filter(k => k !== i && WORDS[k][3].replace('act2', 'act') === c && WORDS[k][1] !== WORDS[i][1] && WORDS[k][0] !== WORDS[i][0]); const extra = WORDS.map((w, k) => k).filter(k => k !== i && !pool.includes(k)); return [...shuffleBy(pool, i), ...shuffleBy(extra, i + 7)].slice(0, n); };
 
+// 난이도: 1 쉬움 · 2 보통 · 3 어려움 — 어느 단계든 문제는 우리말, 그림 힌트도 그대로예요
+const EASY_CAT = new Set(['animal', 'food', 'color', 'num', 'family', 'body', 'weather', 'school', 'clothes', 'nature', 'sport']);
+export function engTier(kind, i) {
+  if (kind === 'x' || kind === 'xm') return 3;
+  const easy = EASY_CAT.has(WORDS[i]?.[3]);
+  if (kind === 'w' || kind === 'o') return easy ? 1 : 2;
+  return easy ? 2 : 3;          // k(영어 고르기) · f(첫 글자)
+}
+// 문제당 KP 배율 (한국사 = 1) — 그림 힌트가 있어 빨리 풀리므로 낮게
+const ENG_KPW = { 1: 0.45, 2: 0.6, 3: 0.8 };
 function word(kind, i) {
   const [en, ko, em, cat] = WORDS[i]; const id = `e.${kind}.${i}`;
-  const base = { id, subj: 'eng', unit: `낱말 · ${CAT_NAME[cat] || '낱말'}`, ctx: '' };
+  const tier = engTier(kind, i);
+  const base = { id, subj: 'eng', unit: `낱말 · ${CAT_NAME[cat] || '낱말'}`, ctx: '', tier, kpw: ENG_KPW[tier] };
   const others = sameCat(i, 3);
   if (kind === 'w') return { ...base, type: 'mc', q: `${em} ‘${en}’의 뜻은 무엇일까요?`, choices: [ko, ...others.map(k => WORDS[k][1])], answer: 0, exp: `${en} = ${ko}` };
   if (kind === 'k') return { ...base, type: 'mc', q: `${em} ‘${ko}’을(를) 영어로 하면?`.replace('을(를)', /[가-힣]$/.test(ko) && (ko.charCodeAt(ko.length - 1) - 0xac00) % 28 ? '을' : '를'), choices: [en, ...others.map(k => WORDS[k][0])], answer: 0, exp: `${ko} = ${en}` };
@@ -149,7 +160,7 @@ function word(kind, i) {
 }
 function expr(kind, i) {
   const [sit, ans, wrong, mean] = EXPR[i]; const id = `e.${kind}.${i}`;
-  const base = { id, subj: 'eng', unit: '의사소통 표현', ctx: '' };
+  const base = { id, subj: 'eng', unit: '의사소통 표현', ctx: '', tier: 3, kpw: ENG_KPW[3] };
   if (kind === 'x') return { ...base, type: 'mc', q: sit, choices: [ans, ...wrong], answer: 0, exp: `${ans} = ${mean}` };
   // xm: 표현의 뜻 고르기
   const others = shuffleBy(EXPR.map((e, k) => k).filter(k => k !== i), i).slice(0, 3).map(k => EXPR[k][3]);
@@ -168,3 +179,4 @@ export const ENG_IDS = [
   ...EXPR.flatMap((e, i) => ['x', 'x', 'xm'].map((k, t) => `e.${k}.${i}`)).filter((v, i, a) => a.indexOf(v) === i),
 ];
 export const ENG_TYPES = id => (id.split('.')[1] === 'o' ? 'ox' : 'mc');
+export const ENG_TIER = id => { const [, k, n] = id.split('.'); return engTier(k, Number(n)); };

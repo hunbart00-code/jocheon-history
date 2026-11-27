@@ -300,6 +300,17 @@ const CONCEPT = [
 ];
 
 const KIND_LIST = Object.keys(K);
+// 난이도: 1 쉬움 · 2 보통 · 3 어려움 (모두 5학년 교과서 단원 안)
+const TIER = { multiple: 1, divcount: 1, notdiv: 1, range: 1, round: 1, perim: 1, corr: 1, prob: 1,
+  gcd: 2, lcm: 2, reduce: 2, cmp: 2, fadd: 2, fsub: 2, fmuln: 2, avg: 2, area: 2,
+  fmul: 3, dmul: 3, mix: 3 };
+export const tierOf = kind => TIER[kind] || 2;
+// 단계(1~10) → 난이도 수준(1~5)과 쉬움·보통·어려움을 섞는 비율
+export const levelOfEra = era => (era <= 2 ? 1 : era <= 4 ? 2 : era <= 6 ? 3 : era <= 8 ? 4 : 5);
+export const TIER_MIX = { 1: [0.8, 0.2, 0], 2: [0.5, 0.45, 0.05], 3: [0.25, 0.55, 0.2], 4: [0.1, 0.5, 0.4], 5: [0.05, 0.4, 0.55] };
+export function pickTier(level, r = Math.random) { const w = TIER_MIX[level] || TIER_MIX[3]; const x = r(); return x < w[0] ? 1 : x < w[0] + w[1] ? 2 : 3; }
+// 문제당 KP 배율 (한국사 = 1) — 수학은 풀이 시간이 길어서 조금 더, 직접 입력하는 문제는 +0.1
+const MATH_KPW = { 1: 0.9, 2: 1.05, 3: 1.2 };
 // 시간 제한 놀이(타임어택)에서 쓸 수 있는 종류 (단답형·OX)
 const SA_KINDS = KIND_LIST.filter(k => K[k].sa);
 
@@ -307,7 +318,8 @@ const SA_KINDS = KIND_LIST.filter(k => K[k].sa);
 function make(kind, p, form) {
   const k = K[kind]; const o = k.build(p);
   const id = `m.${kind}.${p.join('_')}${form ? '.' + form : ''}`;
-  const base = { id, subj: 'math', unit: k.unit, exp: o.exp, ctx: o.ctx || '' };
+  const tier = tierOf(kind);
+  const base = { id, subj: 'math', unit: k.unit, exp: o.exp, ctx: o.ctx || '', tier, kpw: MATH_KPW[tier] + (form === 'sa' ? 0.1 : 0) };
   if (o.type === 'ox') return { ...base, type: 'ox', q: o.q, answer: o.answer };
   const sa = o.sa ?? (typeof o.ans === 'number' ? String(o.ans) : undefined);
   if (form === 'sa' && sa !== undefined) return { ...base, type: 'sa', q: o.q, answers: [sa, sa + 'cm²', sa + 'cm', sa + '개', sa.replace(/,/g, '')] };
@@ -329,21 +341,23 @@ export function mathById(id) {
 }
 function concept(i) {
   const [t, q, ch, a, exp, unit] = CONCEPT[i];
-  const base = { id: `m.c.${i}`, subj: 'math', unit, exp, ctx: '' };
+  const base = { id: `m.c.${i}`, subj: 'math', unit, exp, ctx: '', tier: 1, kpw: MATH_KPW[1] };
   return t === 'ox' ? { ...base, type: 'ox', q, answer: a } : { ...base, type: 'mc', q, choices: ch, answer: a };
 }
 
 // 수학 문제 하나 (types: 쓸 수 있는 형식)
-export function mathQuestion(types = ['mc', 'ox'], r = Math.random) {
+export function mathQuestion(types = ['mc', 'ox'], r = Math.random, level = 3) {
   const canMc = types.includes('mc'), canOx = types.includes('ox'), canSa = types.includes('sa');
-  for (let t = 0; t < 8; t++) {
-    if (r() < 0.15 && (canMc || canOx)) {
+  for (let t = 0; t < 10; t++) {
+    const tier = pickTier(level, r);
+    const LIST = KIND_LIST.filter(k => tierOf(k) === tier), SAL = SA_KINDS.filter(k => tierOf(k) === tier);
+    if (tier === 1 && r() < 0.25 && (canMc || canOx)) {
       const pool = CONCEPT.map((c, i) => i).filter(i => (CONCEPT[i][0] === 'ox' ? canOx : canMc));
       if (pool.length) return concept(pool[Math.floor(r() * pool.length)]);
     }
     let kind, form = '';
-    if (!canMc) { kind = canSa && r() < 0.7 ? SA_KINDS[Math.floor(r() * SA_KINDS.length)] : KIND_LIST[Math.floor(r() * KIND_LIST.length)]; form = K[kind].ox ? '' : (canSa && K[kind].sa && r() < 0.75 ? 'sa' : 'ox'); }
-    else kind = KIND_LIST[Math.floor(r() * KIND_LIST.length)];
+    if (!canMc) { kind = canSa && SAL.length && r() < 0.7 ? SAL[Math.floor(r() * SAL.length)] : LIST[Math.floor(r() * LIST.length)]; form = K[kind].ox ? '' : (canSa && K[kind].sa && r() < 0.75 ? 'sa' : 'ox'); }
+    else kind = LIST[Math.floor(r() * LIST.length)];
     if (K[kind].ox && !canOx) continue;
     try { const q = make(kind, K[kind].gen(r), form); if (q && (q.type !== 'mc' || (q.choices.length >= 2 && q.answer >= 0))) return q; } catch (e) { /* 다시 */ }
   }

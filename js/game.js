@@ -2,14 +2,14 @@
 //  게임 상태 & 행동 — 저장, 수익, 건설, 퀴즈 보상, 시대 돌파 ...
 //  (3차 Firebase 연동 때는 save() 안에서 sync.push(state, reason) 만 추가하면 됩니다)
 // =============================================================
-import * as E from './economy.js?v=202611271127';
-import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js?v=202611271127';
-import { B, D, WONDER } from './data-buildings.js?v=202611271127';
-import { H } from './data-heroes.js?v=202611271127';
-import { T } from './data-techs.js?v=202611271127';
-import { R, RELICS } from './data-relics.js?v=202611271127';
-import { sync } from './sync.js?v=202611271127';
-import { TEACHER_MODE, INF } from './mode.js?v=202611271127';
+import * as E from './economy.js?v=202611271205';
+import { ERAS, BAL, EXPAND, BOSSES, CRISES, MAX_ERA, ERA_BOSSES } from './data-config.js?v=202611271205';
+import { B, D, WONDER } from './data-buildings.js?v=202611271205';
+import { H } from './data-heroes.js?v=202611271205';
+import { T } from './data-techs.js?v=202611271205';
+import { R, RELICS } from './data-relics.js?v=202611271205';
+import { sync } from './sync.js?v=202611271205';
+import { TEACHER_MODE, INF } from './mode.js?v=202611271205';
 
 export const SAVE_KEY = TEACHER_MODE ? 'historyBuilder.teacher' : 'historyBuilder.v1';
 export const G = { s: null, mods: null, syn: null, inc: 0, cap: 100, ls: {} };
@@ -322,7 +322,7 @@ export function answerNormal(q, correct) {
   if (correct) {
     s.stats.correct++; s.combo++; s.bestCombo = Math.max(s.bestCombo, s.combo);
     if (m.shield) s.shield = Math.min(m.shield, (s.shield || 0) + 1);
-    const kp = E.kpPerCorrect(s, s.combo, m); s.kp += kp;
+    const kp = Math.max(1, Math.round(E.kpPerCorrect(s, s.combo, m) * (q.kpw ?? 1))); s.kp += kp;   // 영어·수학은 문제 배율
     let feverStart = false;
     if (s.combo >= 5) { feverStart = !fever(); s.feverUntil = now() + m.feverSec * 1000; }
     let fame = 0; if (s.completed) { fame = E.fameGain(BAL.fame.endless, m); s.fame += fame; }
@@ -422,8 +422,8 @@ export function taReward(n) {
   const m = G.mods; const mult = 1 + m.taMult;
   return { kp: Math.round(n * E.baseKp(G.s, m) * BAL.taKpRatio * mult), gold: Math.round(n * Math.max(20, G.inc) * BAL.taGoldSec * mult) };
 }
-export function taFinish(n, solved) {
-  const s = G.s, r = taReward(n);
+export function taFinish(n, solved, weighted = n) {
+  const s = G.s, r = taReward(weighted);
   s.kp += r.kp; s.gold += r.gold; s.taReadyAt = now() + G.mods.taCooldown * 60000;
   s.stats.solved += solved; s.stats.correct += n; save('ta');
   return r;

@@ -1,21 +1,21 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271127';
-import * as GM from './game.js?v=202611271127';
-import { G } from './game.js?v=202611271127';
-import * as S from './sprites.js?v=202611271127';
-import { VERSION } from './mode.js?v=202611271127';
-import * as Q from './quiz.js?v=202611271127';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271127';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271127';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271127';
-import { HEROES, H } from './data-heroes.js?v=202611271127';
-import { TECHS, T } from './data-techs.js?v=202611271127';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271127';
-import { QZ } from './data-quizzes.js?v=202611271127';
-import { sync } from './sync.js?v=202611271127';
-import { Renderer } from './render.js?v=202611271127';
+import * as E from './economy.js?v=202611271205';
+import * as GM from './game.js?v=202611271205';
+import { G } from './game.js?v=202611271205';
+import * as S from './sprites.js?v=202611271205';
+import { VERSION } from './mode.js?v=202611271205';
+import * as Q from './quiz.js?v=202611271205';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271205';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271205';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271205';
+import { HEROES, H } from './data-heroes.js?v=202611271205';
+import { TECHS, T } from './data-techs.js?v=202611271205';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271205';
+import { QZ } from './data-quizzes.js?v=202611271205';
+import { sync } from './sync.js?v=202611271205';
+import { Renderer } from './render.js?v=202611271205';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -761,7 +761,7 @@ export function openQuizMenu() {
   const mmss = ms => `${Math.floor(ms / 60000)}분 ${Math.floor(ms % 60000 / 1000)}초`;
   const subjBtns = Object.entries(Q.SUBJECTS).map(([k, v]) => `<button class="subj-btn ${(s.subj || 'hist') === k ? 'on' : ''}" data-subj="${k}">${{ hist: '📜', math: '➗', eng: '🔤', mix: '🎲' }[k]} ${v}</button>`).join('');
   openModal(`${head('퀴즈', 'book')}<div class="sh-body"><div class="subj-row"><span>과목</span>${subjBtns}</div>
-    <p class="muted subj-note">${{ hist: s.era > 7 ? '한국사 1~7단계 총복습 문제가 나와요.' : '5학년 2학기 사회(역사) 교과서 문제예요.', math: '5학년 수학: 혼합 계산·약수와 배수·약분과 통분·분수와 소수의 계산·넓이·평균 등', eng: '5학년 영어: 낱말 뜻, 첫 글자, 자주 쓰는 표현. 문제는 우리말로 나와요.', mix: '한국사·수학·영어가 골고루 섞여 나와요.' }[s.subj || 'hist']}</p>
+    <p class="muted subj-note">${{ hist: s.era > 7 ? '한국사 1~7단계 총복습 문제가 나와요.' : '5학년 2학기 사회(역사) 교과서 문제예요.', math: '5학년 수학: 약수와 배수·약분과 통분·분수와 소수의 계산·넓이·평균 등 · 단계가 오를수록 어려운 문제가 많아져요 · KP 0.9~1.3배', eng: '5학년 영어: 낱말 뜻·첫 글자·자주 쓰는 표현 (문제는 우리말) · 단계가 오를수록 어려워져요 · 그림 힌트로 빨리 풀려서 KP 0.45~0.8배', mix: '한국사·수학·영어가 골고루 섞여 나와요. KP는 과목·난이도마다 달라요.' }[s.subj || 'hist']}</p>
     <div class="modes">
     <button class="mode m1" id="mNormal">${icon('book')}<h3>일반 탐구 퀴즈</h3><p>${(s.subj || 'hist') === 'hist' ? '현재 시대 70% + 이전 시대 30%.' : '고른 과목 문제를 풀어요.'} 3연속 정답 KP 1.5배, 5연속이면 피버! 엽전 2배</p><span class="state">문제당 기본 ${F(E.baseKp(s, G.mods))} KP</span></button>
     <button class="mode m2" id="mTA" ${taLeft ? 'disabled' : ''}>${icon('clock')}<h3>60초 타임어택</h3><p>60초 동안 O/X와 단답형을 빠르게! 맞힌 만큼 KP와 엽전을 왕창</p><span class="state">${taLeft ? mmss(taLeft) + ' 뒤 가능' : '지금 도전 가능!'}</span></button>
@@ -820,11 +820,11 @@ export function runNormal() {
 // ---------- 60초 타임어택 ----------
 export function runTimeAttack() {
   if (!GM.taReady()) { toast('아직 타임어택을 할 수 없어요.', 'bad'); return; }
-  quizBusy = true; let n = 0, solved = 0, end = Date.now() + BAL.taSec * 1000, timer = null, done = false;
+  quizBusy = true; let n = 0, nw = 0, solved = 0, end = Date.now() + BAL.taSec * 1000, timer = null, done = false;
   const s = G.s;
   const finish = () => {
     if (done) return; done = true; clearInterval(timer);
-    const r = GM.taFinish(n, solved); sfx('fanfare');
+    const r = GM.taFinish(n, solved, nw); sfx('fanfare');
     openModal(`${head('타임어택 결과', 'clock')}<div class="sh-body" style="text-align:center">
       <div style="font-family:Jua;font-size:4em;color:#c8352b">${n}<span style="font-size:.4em;color:#7a4a24">문제 정답 / ${solved}문제</span></div>
       <p style="font-family:Jua;font-size:1.5em">${costHtml(r.kp, 0)} &nbsp; ${costHtml(0, r.gold)}</p>
@@ -840,7 +840,7 @@ export function runTimeAttack() {
     bindAnswer(q, (ans, btn) => {
       const right = Q.checkAnswer(q, ans); solved++; markChoices(q, btn, right);
       GM.countSubj(q, right);
-      if (right) { n++; sfx('correct'); } else { sfx('wrong'); end -= 2000; $('fb').innerHTML = `<div class="qz-fb no"><b>-2초</b><span class="grow">정답: ${esc(Q.answerText(q))}</span></div>`; }
+      if (right) { n++; nw += q.kpw ?? 1; sfx('correct'); } else { sfx('wrong'); end -= 2000; $('fb').innerHTML = `<div class="qz-fb no"><b>-2초</b><span class="grow">정답: ${esc(Q.answerText(q))}</span></div>`; }
       setTimeout(() => { if (!done) render(); }, right ? 350 : 1100);
     });
   };

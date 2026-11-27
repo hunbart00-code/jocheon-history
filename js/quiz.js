@@ -1,13 +1,13 @@
 // =============================================================
 //  문제 출제 엔진 — 현재 시대 70% + 이전 시대 30%, 오답 큐 재출제, 자동 생성 문제
 // =============================================================
-import { QUIZZES, QZ } from './data-quizzes.js?v=202611271127';
-import { RELICS, R } from './data-relics.js?v=202611271127';
-import { BUILDINGS, B } from './data-buildings.js?v=202611271127';
-import { HEROES, H } from './data-heroes.js?v=202611271127';
-import { BAL, HISTORY_ERA } from './data-config.js?v=202611271127';
-import { mathQuestion, mathById } from './data-math.js?v=202611271127';
-import { engById, ENG_IDS, ENG_TYPES } from './data-english.js?v=202611271127';
+import { QUIZZES, QZ } from './data-quizzes.js?v=202611271205';
+import { RELICS, R } from './data-relics.js?v=202611271205';
+import { BUILDINGS, B } from './data-buildings.js?v=202611271205';
+import { HEROES, H } from './data-heroes.js?v=202611271205';
+import { BAL, HISTORY_ERA } from './data-config.js?v=202611271205';
+import { mathQuestion, mathById, levelOfEra, pickTier } from './data-math.js?v=202611271205';
+import { engById, ENG_IDS, ENG_TYPES, ENG_TIER } from './data-english.js?v=202611271205';
 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -90,7 +90,11 @@ function subjectFor(state, opt, types) {
 }
 function englishQuestion(state, types, recent) {
   const seen = new Set(state.seen || []);
-  const pool = ENG_IDS.filter(id => types.includes(ENG_TYPES(id)));
+  const all = ENG_IDS.filter(id => types.includes(ENG_TYPES(id)));
+  // 단계에 맞는 난이도 (그 난이도 문제가 이 모드에 없으면 전체에서)
+  const tier = pickTier(levelOfEra(state.era || 1));
+  const byTier = all.filter(id => ENG_TIER(id) === tier);
+  const pool = byTier.length ? byTier : all;
   let fresh = pool.filter(id => !seen.has(id) && !recent.has(id));
   if (!fresh.length) { const ids = new Set(pool); state.seen = (state.seen || []).filter(id => !ids.has(id)); fresh = pool.filter(id => !recent.has(id)); }
   return present(engById(pick(fresh.length ? fresh : pool)));
@@ -113,7 +117,7 @@ export function nextQuestion(state, opt = {}) {
     }
   }
   // 1-1) 수학·영어
-  if (subj === 'math') { for (let k = 0; k < 6; k++) { const q = mathQuestion(types); if (!recent.has(q.id)) return present(q); } return present(mathQuestion(types)); }
+  if (subj === 'math') { const lv = levelOfEra(state.era || 1); for (let k = 0; k < 6; k++) { const q = mathQuestion(types, Math.random, lv); if (!recent.has(q.id)) return present(q); } return present(mathQuestion(types, Math.random, lv)); }
   if (subj === 'eng') return englishQuestion(state, types, recent);
   const seen = new Set(state.seen || []);
   // 2) 자동 생성 (20%) — 이미 본 것은 건너뜀

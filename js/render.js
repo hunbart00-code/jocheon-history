@@ -1,11 +1,11 @@
 // =============================================================
 //  아이소메트릭 마을 렌더러 (캔버스) — 카메라·확대·클릭 판정·애니메이션
 // =============================================================
-import * as S from './sprites.js?v=202611271127';
-import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271127';
-import { B, D } from './data-buildings.js?v=202611271127';
-import { H } from './data-heroes.js?v=202611271127';
-import { ERAS } from './data-config.js?v=202611271127';
+import * as S from './sprites.js?v=202611271205';
+import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271205';
+import { B, D } from './data-buildings.js?v=202611271205';
+import { H } from './data-heroes.js?v=202611271205';
+import { ERAS } from './data-config.js?v=202611271205';
 
 const ISL0 = -4, ISL1 = GRID + 3;   // 섬 범위 (타일)
 const tierOf = lv => lv >= 10 ? 2 : lv >= 5 ? 1 : 0;
