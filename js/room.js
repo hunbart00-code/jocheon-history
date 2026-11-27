@@ -7,14 +7,14 @@
 //  서버: visits/{마을}/people/{나} · visits/{마을}/game/ox · visits/{마을}/picks/{보물}
 //  무료 서버 한도를 아끼려고, 위치는 ‘방향이 바뀔 때’와 3초마다만 보내고 나머지는 예측해서 그려요
 // =============================================================
-import * as S from './sprites.js?v=202611271355';
-import { tileToWorld } from './render.js?v=202611271355';
-import { activeOffset, occupancy } from './economy.js?v=202611271355';
-import { B } from './data-buildings.js?v=202611271355';
-import { QUIZZES } from './data-quizzes.js?v=202611271355';
-import { HISTORY_ERA } from './data-config.js?v=202611271355';
-import { sync } from './sync.js?v=202611271355';
-import { badWord } from './badwords.js?v=202611271355';
+import * as S from './sprites.js?v=202611271441';
+import { tileToWorld } from './render.js?v=202611271441';
+import { activeOffset, occupancy } from './economy.js?v=202611271441';
+import { B } from './data-buildings.js?v=202611271441';
+import { QUIZZES } from './data-quizzes.js?v=202611271441';
+import { HISTORY_ERA } from './data-config.js?v=202611271441';
+import { sync } from './sync.js?v=202611271441';
+import { badWord } from './badwords.js?v=202611271441';
 
 const SPEED = 1.7;            // 걷는 빠르기 (칸/초)
 const STRIDE = 0.8;           // 두 걸음에 가는 거리 (칸)
@@ -60,7 +60,11 @@ export function oxQuestions(seed, era, n = OX.n) {
  */
 export function startRoom(opt) {
   const { vid, village, renderer, layer } = opt;
-  const meInfo = opt.me || null;
+  const meInfo = opt.me || null;             // 놀러 온 친구 (OX·보물까지 다 해요)
+  const hostInfo = opt.host || null;         // 내 마을 주인: 친구가 오면 내 캐릭터가 나타나고 방향키로 걸어가 만날 수 있어요
+  const who = meInfo || hostInfo;
+  const ownerOf = p => p.cls === village.classCode && Number(p.no) === Number(village.studentNo);
+  let lastVisitorT = 0;
   const n = village.mapSize || 4, o = activeOffset(n);
   const occ = occupancy(village);
   const blocked = (i, j) => { const t = occ.get(Math.round(i) + ',' + Math.round(j)); return !!t && (!!B[t.type] || t.type === 'wonder'); };
@@ -73,7 +77,7 @@ export function startRoom(opt) {
   const dayKey = 'hb.roomWrites.' + new Date().toDateString();
   let sentToday = 0; try { sentToday = Number(localStorage.getItem(dayKey) || 0); } catch (e) {}
   function put(data) {
-    if (!meInfo || !alive) return;
+    if (!who || !me || !alive) return;
     sentToday++; try { localStorage.setItem(dayKey, String(sentToday)); } catch (e) {}
     sync.roomPut(vid, data).catch(e => console.warn('room', e));
   }
@@ -85,7 +89,7 @@ export function startRoom(opt) {
   const free = (i, j) => inside(i, j);     // 건물은 뚫고 지나가요 (건물이 많은 마을에서도 어디든 갈 수 있게), 마을 밖으로만 못 나가요
 
   // ---------- 내 캐릭터 ----------
-  if (meInfo) {
+  function spawnMe(info) {
     let best = null;
     for (let j = o; j < o + n; j++) for (let i = o; i < o + n; i++) {
       if (blocked(i, j)) continue;
@@ -93,10 +97,11 @@ export function startRoom(opt) {
       if (!best || d < best.d) best = { i, j, d };
     }
     const sp = best || { i: o + n / 2, j: o + n / 2 };
-    me = { id: 'me', me: true, i: sp.i, j: sp.j, vx: 0, vy: 0, k: (meInfo.av || 0) % 6, era: meInfo.era || 1, label: meInfo.label, flip: false, ph: 0, amp: 0 };
-    put({ name: meInfo.name, no: meInfo.no, cls: meInfo.cls, av: meInfo.av || 0, era: meInfo.era || 1, x: r2(me.i), y: r2(me.j), vx: 0, vy: 0, msg: '', msgAt: 0 });
-    lastSent = Date.now();
+    me = { id: 'me', me: true, i: sp.i, j: sp.j, vx: 0, vy: 0, k: (info.av || 0) % 6, era: info.era || 1, label: info.label + (ownerOf(info) ? ' · 주인' : ''), flip: false, ph: 0, amp: 0 };
+    put({ name: info.name, no: info.no, cls: info.cls, av: info.av || 0, era: info.era || 1, x: r2(me.i), y: r2(me.j), vx: 0, vy: 0, msg: '', msgAt: 0 });
+    lastSent = Date.now(); sentDir = '0'; beatT = Date.now();
   }
+  if (meInfo) spawnMe(meInfo);
 
   // ---------- 다른 친구들 ----------
   unsubs.push(sync.roomWatch(vid, list => {
@@ -113,9 +118,10 @@ export function startRoom(opt) {
       if (!a) {
         a = { id: p.id, i: p.x ?? o + n / 2, j: p.y ?? o + n / 2, ax: p.x, ay: p.y, avx: 0, avy: 0, aT: performance.now(), maxT: 0, at: p.at, seen: now, msgAt: p.msgAt || 0, emoAt: p.emoAt || 0, flip: false, ph: 0, amp: 0 };
         others.set(p.id, a);
-        if (!meInfo && opt.onToast) opt.onToast(`${p.no ? p.no + '번 ' : ''}${p.name} 친구가 우리 마을에 놀러 왔어요!`);
+        if (!meInfo && opt.onToast) opt.onToast(`${p.no ? p.no + '번 ' : ''}${p.name} 친구가 우리 마을에 놀러 왔어요!${hostInfo ? ' 방향키로 걸어가서 만나 봐요' : ''}`);
       }
-      a.k = (p.av || 0) % 6; a.era = p.era || 1; a.label = `${p.no ? p.no + '번 ' : ''}${p.name || '친구'}`; a.name = p.name || '친구';
+      a.owner = ownerOf(p);
+      a.k = (p.av || 0) % 6; a.era = p.era || 1; a.label = `${p.no ? p.no + '번 ' : ''}${p.name || '친구'}${a.owner ? ' · 주인' : ''}`; a.name = p.name || '친구';
       if ((p.oxg || '') !== a.oxg) { a.oxg = p.oxg || ''; a.oxs = p.oxs || 0; } else a.oxs = Math.max(a.oxs || 0, p.oxs || 0);   // 늦게 온 옛 소식에 점수가 줄지 않게
       if (typeof p.x === 'number' && (p.x !== a.ax || p.y !== a.ay || (p.vx || 0) !== a.avx || (p.vy || 0) !== a.avy || p.at !== a.at)) {
         a.ax = p.x; a.ay = p.y; a.avx = p.vx || 0; a.avy = p.vy || 0; a.aT = performance.now(); a.maxT = runTime(p.x, p.y, a.avx, a.avy);
@@ -328,18 +334,25 @@ export function startRoom(opt) {
   // ---------- 키보드 · 화면 방향 버튼 ----------
   const typing = () => { const el = document.activeElement; return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'); };
   const kd = e => {
-    if (typing() || !me) return;
+    if (typing() || !me || (opt.canAct && !opt.canAct())) return;
     const k = KEYS[e.key];
     if (k) { keys.add(k); e.preventDefault(); return; }
     const num = Number(e.key); if (num >= 1 && num <= EMOTES.length && !e.repeat) { if (emote(EMOTES[num - 1].id)) opt.onEmote?.(EMOTES[num - 1].id); }
   };
   const ku = e => { const k = KEYS[e.key]; if (k) keys.delete(k); };
   const blur = () => keys.clear();
-  if (me) { window.addEventListener('keydown', kd); window.addEventListener('keyup', ku); window.addEventListener('blur', blur); }
+  if (who) { window.addEventListener('keydown', kd); window.addEventListener('keyup', ku); window.addEventListener('blur', blur); }
 
   // ---------- 매 프레임 ----------
   function step(dt) {
     const now = Date.now();
+    // 마을 주인: 친구가 있으면 내 캐릭터가 나타나고, 친구가 다 가고 30초 지나면 들어가요
+    if (hostInfo) {
+      let visitors = 0; for (const a of others.values()) if (now - a.seen < STALE) visitors++;
+      if (visitors) { lastVisitorT = now; if (!me) { spawnMe(hostInfo); opt.onHostShow?.(); } }
+      else if (me && now - lastVisitorT > 30000) { sync.roomLeave(vid); me = null; keys.clear(); }
+    }
+    if (me && keys.size && opt.canAct && !opt.canAct()) keys.clear();      // 창이 열리면 걷기 멈춤
     if (me) {
       let di = 0, dj = 0; for (const k of keys) { di += DIR[k][0]; dj += DIR[k][1]; }
       const len = Math.hypot(di, dj), tvx = len ? di / len * SPEED : 0, tvy = len ? dj / len * SPEED : 0;
@@ -400,7 +413,7 @@ export function startRoom(opt) {
     for (const a of list()) {
       live.add(a.id);
       let el = tags.get(a.id);
-      if (!el) { el = document.createElement('div'); el.className = 'av-tag' + (a.me ? ' me' : ''); el.innerHTML = '<i class="av-emo"></i><p class="av-bubble"></p><span class="av-name"></span>'; layer.appendChild(el); tags.set(a.id, el); }
+      if (!el) { el = document.createElement('div'); el.className = 'av-tag' + (a.me ? ' me' : '') + (a.owner ? ' owner' : ''); el.innerHTML = '<i class="av-emo"></i><p class="av-bubble"></p><span class="av-name"></span>'; layer.appendChild(el); tags.set(a.id, el); }
       const [X, Y] = tileToWorld(a.i, a.j);
       const [sx, sy] = renderer.toScreen(X, Y - 30 - (a.jump || 0));
       el.style.transform = `translate(${Math.round(sx)}px, ${Math.round(sy)}px) translate(-50%, -100%)`;
@@ -429,7 +442,7 @@ export function startRoom(opt) {
   function press(dir, on) { if (!me) return; if (on) keys.add(dir); else keys.delete(dir); }
   function stop() {
     alive = false; unsubs.forEach(u => { try { u?.(); } catch (e) {} });
-    if (me) { window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('blur', blur); sync.roomLeave(vid); }
+    if (who) { window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('blur', blur); if (me || meInfo) sync.roomLeave(vid); }
     for (const el of tags.values()) el.remove(); tags.clear();
     renderer.avatars = []; renderer.items = []; renderer.groundFx = null; renderer.overFx = null;
   }

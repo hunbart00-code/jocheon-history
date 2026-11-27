@@ -1,22 +1,22 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271355';
-import { G } from './game.js?v=202611271355';
-import * as UI from './ui.js?v=202611271355';
-import { ctx } from './ui.js?v=202611271355';
-import { Renderer } from './render.js?v=202611271355';
-import * as S from './sprites.js?v=202611271355';
-import * as E from './economy.js?v=202611271355';
-import { B, D } from './data-buildings.js?v=202611271355';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271355';
-import { sync } from './sync.js?v=202611271355';
-import { preloadImages, uiImages } from './images.js?v=202611271355';
-import { initSocial } from './social.js?v=202611271355';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271355';
-import * as Title from './title.js?v=202611271355';
-import * as FS from './fullscreen.js?v=202611271355';
-import { startRoom } from './room.js?v=202611271355';
+import * as GM from './game.js?v=202611271441';
+import { G } from './game.js?v=202611271441';
+import * as UI from './ui.js?v=202611271441';
+import { ctx } from './ui.js?v=202611271441';
+import { Renderer } from './render.js?v=202611271441';
+import * as S from './sprites.js?v=202611271441';
+import * as E from './economy.js?v=202611271441';
+import { B, D } from './data-buildings.js?v=202611271441';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271441';
+import { sync } from './sync.js?v=202611271441';
+import { preloadImages, uiImages } from './images.js?v=202611271441';
+import { initSocial } from './social.js?v=202611271441';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271441';
+import * as Title from './title.js?v=202611271441';
+import * as FS from './fullscreen.js?v=202611271441';
+import { startRoom } from './room.js?v=202611271441';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -226,14 +226,20 @@ function boot() {
 }
 let last = performance.now(), hostRoom = null, joinT = 0;
 function makeHostRoom() {
-  return startRoom({ vid: sync.docId, village: G.s, renderer: R, layer: $('hostTags'), me: null, onToast: m => { sfx('rare'); UI.toast(m, 'good', 'people'); } });
+  const s = G.s;
+  return startRoom({
+    vid: sync.docId, village: s, renderer: R, layer: $('hostTags'), me: null,
+    host: { name: s.name, no: s.studentNo, cls: s.classCode, av: s.avatar || 0, era: s.era, label: `${s.studentNo ? s.studentNo + '번 ' : ''}${s.name}` },
+    canAct: () => $('overlay').classList.contains('hidden') && $('modal').classList.contains('hidden') && !placing,
+    onToast: m => { sfx('rare'); UI.toast(m, 'good', 'people'); },
+  });
 }
 // 놀러 온 친구가 있으면 ‘같이 놀기’ 버튼이 떠요 → 내 마을에서 나도 걸어 다니며 같이 놀아요
 function updateHostJoin() {
   const el = $('hostJoin'); if (!el) return;
   const n = hostRoom ? hostRoom.count() : 0, busy = !$('overlay').classList.contains('hidden');
   el.classList.toggle('hidden', !n || busy);
-  if (n) { const t = `친구 ${n}명이 놀러 왔어요 · 같이 놀기`; if (el.dataset.t !== t) { el.dataset.t = t; el.querySelector('span').textContent = t; } }
+  if (n) { const t = `친구 ${n}명이 놀러 왔어요 · 말풍선·OX 퀴즈 하러 가기`; if (el.dataset.t !== t) { el.dataset.t = t; el.querySelector('span').textContent = t; } }
 }
 btn('hostJoin', () => {
   if (!hostRoom || !sync.docId) return;

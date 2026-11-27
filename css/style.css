@@ -956,3 +956,6 @@ body.title-on .world-notice { left: 0; right: calc(min(1vh, 0.62vw) * 13 + var(-
   .v-emo button { width: 2.9em; height: 2.9em; }
   .v-gains { bottom: 38%; }
 }
+
+/* 마을 주인 이름표 */
+.av-tag.owner .av-name { background: rgba(32,110,48,0.9); color: #eaffd8; }
