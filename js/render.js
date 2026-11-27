@@ -1,11 +1,11 @@
 // =============================================================
 //  아이소메트릭 마을 렌더러 (캔버스) — 카메라·확대·클릭 판정·애니메이션
 // =============================================================
-import * as S from './sprites.js?v=202611271306';
-import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271306';
-import { B, D } from './data-buildings.js?v=202611271306';
-import { H } from './data-heroes.js?v=202611271306';
-import { ERAS } from './data-config.js?v=202611271306';
+import * as S from './sprites.js?v=202611271311';
+import { GRID, activeOffset, occupancy, synergyInfo, isActiveTile } from './economy.js?v=202611271311';
+import { B, D } from './data-buildings.js?v=202611271311';
+import { H } from './data-heroes.js?v=202611271311';
+import { ERAS } from './data-config.js?v=202611271311';
 
 const ISL0 = -4, ISL1 = GRID + 3;   // 섬 범위 (타일)
 const tierOf = lv => lv >= 10 ? 2 : lv >= 5 ? 1 : 0;
@@ -17,7 +17,7 @@ export class Renderer {
     this.cv = canvas; this.g = canvas.getContext('2d');
     this.cam = { x: 0, y: (GRID - 1) * H2, s: 2 };
     this.userZoom = 0;
-    this.people = []; this.fx = []; this.scenery = []; this.sceneryKey = '';
+    this.people = []; this.fx = []; this.scenery = []; this.sceneryKey = ''; this.avatars = [];
     this.hover = null; this.mode = null; this.selected = null; this.ghost = null;
     this.coinBoxes = []; this.crisisBox = null;
     this.t = 0; this.dpr = 1;
@@ -214,6 +214,11 @@ export class Renderer {
       const fr = p.ti != null ? Math.floor(this.t * 6 + p.k) % 2 : 0;
       objs.push({ d: p.i + p.j + 0.02, i: p.i, j: p.j, spr: S.personSprite(p.k, fr, state.era || 1), flip: p.flip });
     }
+    // 친구 마을에 놀러 온 친구들 · 내 캐릭터 (방향키로 움직여요)
+    for (const a of this.avatars || []) {
+      const fr = a.moving ? Math.floor(this.t * 7) % 2 : 0;
+      objs.push({ d: a.i + a.j + 0.03, i: a.i, j: a.j, spr: S.personSprite(a.k, fr, a.era || 1), flip: a.flip, ring: a.me ? '#ffe14a' : '#ffffff' });
+    }
     // 고스트(배치 미리보기)
     if (this.ghost && this.hover) objs.push({ d: this.hover.x + this.hover.y + 0.5, i: this.hover.x + (this.ghost.size === 2 ? 0.5 : 0), j: this.hover.y + (this.ghost.size === 2 ? 0.5 : 0), spr: this.ghost.spr, alpha: this.ghost.ok ? 0.75 : 0.35 });
     objs.sort((a, b) => a.d - b.d || a.i - b.i);
@@ -223,6 +228,7 @@ export class Renderer {
         g.save(); g.globalAlpha = 0.35 + 0.15 * Math.sin(this.t * 3 + o.i);
         g.fillStyle = '#ffe27a'; g.beginPath(); g.ellipse(X, Y, 30, 14, 0, 0, Math.PI * 2); g.fill(); g.restore();
       }
+      if (o.ring) { g.save(); g.globalAlpha = 0.55; g.strokeStyle = o.ring; g.lineWidth = 1.5; g.beginPath(); g.ellipse(X, Y, 9, 4.5, 0, 0, Math.PI * 2); g.stroke(); g.restore(); }
       if (o.alpha) g.globalAlpha = o.alpha;
       if (o.broken) g.filter = 'grayscale(0.75) brightness(0.62) sepia(0.35)';
       if (o.flip) { g.save(); g.translate(X, 0); g.scale(-1, 1); g.drawImage(o.spr.img, -o.spr.ox, Y - o.spr.oy, o.spr.w, o.spr.h); g.restore(); }

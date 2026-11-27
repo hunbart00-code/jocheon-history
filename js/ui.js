@@ -1,21 +1,22 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271306';
-import * as GM from './game.js?v=202611271306';
-import { G } from './game.js?v=202611271306';
-import * as S from './sprites.js?v=202611271306';
-import { VERSION } from './mode.js?v=202611271306';
-import * as Q from './quiz.js?v=202611271306';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271306';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271306';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271306';
-import { HEROES, H } from './data-heroes.js?v=202611271306';
-import { TECHS, T } from './data-techs.js?v=202611271306';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271306';
-import { QZ } from './data-quizzes.js?v=202611271306';
-import { sync } from './sync.js?v=202611271306';
-import { Renderer } from './render.js?v=202611271306';
+import * as E from './economy.js?v=202611271311';
+import * as GM from './game.js?v=202611271311';
+import { G } from './game.js?v=202611271311';
+import * as S from './sprites.js?v=202611271311';
+import { VERSION } from './mode.js?v=202611271311';
+import * as Q from './quiz.js?v=202611271311';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271311';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271311';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271311';
+import { HEROES, H } from './data-heroes.js?v=202611271311';
+import { TECHS, T } from './data-techs.js?v=202611271311';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271311';
+import { QZ } from './data-quizzes.js?v=202611271311';
+import { sync } from './sync.js?v=202611271311';
+import { Renderer } from './render.js?v=202611271311';
+import { startRoom } from './room.js?v=202611271311';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -569,24 +570,53 @@ export function visitFriend(d) {
     <div class="panel" style="position:absolute;top:.8em;left:50%;transform:translateX(-50%);font-size:1.4em;gap:.6em">
       <img src="${avatarURL(d.summary?.avatar || 0)}" style="width:2em;height:2em;image-rendering:pixelated;border-radius:.3em" alt="">
       <span>${esc(d.name)}의 마을 · ${d.era}단계 ${ERAS[d.era]?.name || ''}</span></div>
-    <div style="position:absolute;left:0;right:0;bottom:calc(.4em + var(--badge));display:flex;gap:.5em;justify-content:center;flex-wrap:wrap;padding:0 .8em" id="visitBar">
-      ${STICKERS.map(st => `<button class="btn gold" data-st="${st.id}">${icon(st.icon)} ${st.label}</button>`).join('')}
-      <button class="btn red ${crisisOn() ? '' : 'hidden'}" id="vHelp">${icon('warn')} 위기 막아 주기</button>
-      ${d.summary?.pvp && G.s.pvp ? `<button class="btn red" id="vWar">${icon('war')} 선전포고</button>` : ''}
-      <button class="btn gray" id="vBack">우리 마을로</button>
+    <div class="av-layer" id="visitTags"></div>
+    <div class="v-hint" id="vHint">방향키(또는 W·A·S·D)로 걸어 다니고, 아래 칸에 말하면 말풍선이 떠요</div>
+    <div class="dpad" id="vPad" aria-label="움직이기">${['u', 'l', 'r', 'd'].map(k => `<button type="button" data-dir="${k}" class="dp-${k}" aria-label="${{ u: '위', d: '아래', l: '왼쪽', r: '오른쪽' }[k]}">${{ u: '▲', d: '▼', l: '◀', r: '▶' }[k]}</button>`).join('')}</div>
+    <div class="v-bottom">
+      <form class="v-chat" id="vChat" autocomplete="off"><input id="vChatIn" maxlength="40" placeholder="${sync.classControl?.chatOff ? '선생님이 채팅을 꺼 두었어요' : '말풍선으로 말해요 (엔터)'}" ${sync.classControl?.chatOff ? 'disabled' : ''}><button class="btn green" type="submit" ${sync.classControl?.chatOff ? 'disabled' : ''}>말하기</button></form>
+      <div class="v-bar" id="visitBar">
+        ${STICKERS.map(st => `<button class="btn gold" data-st="${st.id}">${icon(st.icon)} ${st.label}</button>`).join('')}
+        <button class="btn red ${crisisOn() ? '' : 'hidden'}" id="vHelp">${icon('warn')} 위기 막아 주기</button>
+        ${d.summary?.pvp && G.s.pvp ? `<button class="btn red" id="vWar">${icon('war')} 선전포고</button>` : ''}
+        <button class="btn gray" id="vBack">우리 마을로</button>
+      </div>
     </div>`;
   if (!visitR) visitR = new Renderer($('visitCv')); else { visitR.cv = $('visitCv'); visitR.g = visitR.cv.getContext('2d'); }
   visitR.people = []; visitR.sceneryKey = ''; visitR.userZoom = 0; visitR.resize();
   const warnImg = S.iconCanvas('warn', 32);
+  // 함께 놀기: 내 캐릭터 + 같은 마을에 온 친구들
+  const vid = d.id || `${d.classCode}_${d.studentNo}`;
+  const room = startRoom({
+    vid, village: d, renderer: visitR, layer: $('visitTags'),
+    me: { name: G.s.name, no: G.s.studentNo, cls: G.s.classCode, av: G.s.avatar || 0, era: G.s.era, label: `${G.s.studentNo ? G.s.studentNo + '번 ' : ''}${G.s.name}` },
+    onSay: text => { if (sync.enabled && sync.classCode && !sync.classControl?.chatOff) sync.sendChat(G.s, `[${d.name} 마을] ${text}`.slice(0, 80)).catch(() => {}); },   // 선생님이 교사 화면에서 볼 수 있게
+  });
+  $('vChat').onsubmit = e => {
+    e.preventDefault(); const inp = $('vChatIn'); const r = room.say(inp.value);
+    if (r.ok) { inp.value = ''; sfx('click'); inp.blur(); }
+    else if (r.why === 'bad') { sfx('wrong'); toast('고운 말을 써 주세요! 친구가 상처받을 수 있어요.', 'bad', 'warn'); }
+    else if (r.why === 'off') toast('선생님이 채팅을 꺼 두었어요.', 'bad');
+  };
+  $('vChatIn').onkeydown = e => { if (e.key === 'Escape') e.target.blur(); e.stopPropagation(); };
+  ov.querySelectorAll('[data-dir]').forEach(b => {
+    const on = e => { e.preventDefault(); room.press(b.dataset.dir, true); b.classList.add('on'); };
+    const off = () => { room.press(b.dataset.dir, false); b.classList.remove('on'); };
+    b.onpointerdown = on; b.onpointerup = off; b.onpointerleave = off; b.onpointercancel = off;
+  });
   let last = performance.now();
   const loop = t => {
     const dt = Math.min(0.1, (t - last) / 1000); last = t;
     const view = { ...d, crisis: crisisOn() ? d.crisis : null };
+    room.step(dt);
     visitR.draw(view, { warnImg, storageRatio: 0, portraits: portraitImg }, dt);
+    room.drawTags();
     visitRAF = requestAnimationFrame(loop);
   };
   visitRAF = requestAnimationFrame(loop);
+  let closed = false;
   const close = () => {
+    if (closed) return; closed = true; room.stop();
     ov.classList.add('leaving'); updateHud(true);
     setTimeout(() => {
       cancelAnimationFrame(visitRAF);

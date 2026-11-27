@@ -6,7 +6,7 @@
 //   chats/{학급코드}/msgs/{자동}: 학급 채팅 (최근 50개만 구독)
 //  firebase-config.js 의 apiKey 가 비어 있으면 아무것도 하지 않습니다(로컬 모드).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271306';
+import { firebaseConfig } from './firebase-config.js?v=202611271311';
 
 const V = '10.12.2';
 const CDN = `https://www.gstatic.com/firebasejs/${V}/`;
@@ -201,6 +201,21 @@ export const sync = {
     const q = F.query(F.collection(db, 'chats', this.classCode, 'msgs'), F.orderBy('ct', 'desc'), F.limit(50));
     this._unsubChat = F.onSnapshot(q, snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse()), e => console.warn('채팅 구독 실패', e));
   },
+  // ---------- 친구 마을 함께 놀기: visits/{마을}/people/{내 로그인 번호} ----------
+  get myUid() { return uid; },
+  async roomPut(vid, data) {
+    if (!this.enabled || !vid || !uid) return;
+    await F.setDoc(F.doc(db, 'visits', vid, 'people', uid), { ...data, uid, at: Date.now() }, { merge: true });
+  },
+  async roomLeave(vid) {
+    if (!this.enabled || !vid || !uid) return;
+    try { await F.deleteDoc(F.doc(db, 'visits', vid, 'people', uid)); } catch (e) { /* 이미 없으면 그만 */ }
+  },
+  roomWatch(vid, cb) {
+    if (!this.enabled || !vid) return () => {};
+    return F.onSnapshot(F.collection(db, 'visits', vid, 'people'), snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))), e => console.warn('room', e));
+  },
+
   async sendChat(me, text, kind = 'msg') {
     await F.addDoc(F.collection(db, 'chats', this.classCode, 'msgs'), { no: me.studentNo, name: me.name, av: me.avatar || 0, text, kind, ct: Date.now(), uid });
   },

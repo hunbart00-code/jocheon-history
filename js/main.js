@@ -1,21 +1,22 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271306';
-import { G } from './game.js?v=202611271306';
-import * as UI from './ui.js?v=202611271306';
-import { ctx } from './ui.js?v=202611271306';
-import { Renderer } from './render.js?v=202611271306';
-import * as S from './sprites.js?v=202611271306';
-import * as E from './economy.js?v=202611271306';
-import { B, D } from './data-buildings.js?v=202611271306';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271306';
-import { sync } from './sync.js?v=202611271306';
-import { preloadImages, uiImages } from './images.js?v=202611271306';
-import { initSocial } from './social.js?v=202611271306';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271306';
-import * as Title from './title.js?v=202611271306';
-import * as FS from './fullscreen.js?v=202611271306';
+import * as GM from './game.js?v=202611271311';
+import { G } from './game.js?v=202611271311';
+import * as UI from './ui.js?v=202611271311';
+import { ctx } from './ui.js?v=202611271311';
+import { Renderer } from './render.js?v=202611271311';
+import * as S from './sprites.js?v=202611271311';
+import * as E from './economy.js?v=202611271311';
+import { B, D } from './data-buildings.js?v=202611271311';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271311';
+import { sync } from './sync.js?v=202611271311';
+import { preloadImages, uiImages } from './images.js?v=202611271311';
+import { initSocial } from './social.js?v=202611271311';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271311';
+import * as Title from './title.js?v=202611271311';
+import * as FS from './fullscreen.js?v=202611271311';
+import { startRoom } from './room.js?v=202611271311';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -219,15 +220,19 @@ function boot() {
   R.fitPending = true; UI.updateHud(true);
   if (G.awayGain > 1) setTimeout(() => UI.toast(`자리를 비운 동안 창고에 엽전 ${E.fmt(G.awayGain)}이 쌓였어요!`, 'good', 'coin'), 600);
   if (G.s.newEraNotice) { delete G.s.newEraNotice; GM.save('era'); setTimeout(() => UI.newEraNews?.(), 900); }
+  // 내 마을에 놀러 온 친구들이 걸어 다니는 모습 보기 (구경만)
+  if (sync.enabled && sync.docId && !G.s.teacher && !hostRoom) hostRoom = startRoom({ vid: sync.docId, village: G.s, renderer: R, layer: $('hostTags'), me: null, onToast: m => { sfx('rare'); UI.toast(m, 'good', 'people'); } });
   requestAnimationFrame(loop);
 }
-let last = performance.now();
+let last = performance.now(), hostRoom = null;
 function loop(t) {
   const dt = Math.min(0.1, (t - last) / 1000); last = t;
   if (G.s && !sync.stale && ((!sync.classControl.paused && !sync.global.closed) || G.s.teacher)) GM.tick(dt);
   if (G.s) {
     if (R.selected && R.selected.uid && !placing && !G.s.buildings.includes(R.selected)) R.selected = G.s.buildings.find(b => b.uid === R.selected.uid) || null;
+    hostRoom?.step(dt);
     R.draw(G.s, { coinImg, warnImg, storageRatio: G.cap ? G.s.storage / G.cap : 0, portraits: UI.portraitImg }, dt);
+    hostRoom?.drawTags();
     UI.updateHud();
   }
   requestAnimationFrame(loop);
