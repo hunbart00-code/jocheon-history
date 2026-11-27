@@ -1,13 +1,13 @@
 // =============================================================
 //  문제 출제 엔진 — 현재 시대 70% + 이전 시대 30%, 오답 큐 재출제, 자동 생성 문제
 // =============================================================
-import { QUIZZES, QZ } from './data-quizzes.js?v=202611271238';
-import { RELICS, R } from './data-relics.js?v=202611271238';
-import { BUILDINGS, B } from './data-buildings.js?v=202611271238';
-import { HEROES, H } from './data-heroes.js?v=202611271238';
-import { BAL, HISTORY_ERA } from './data-config.js?v=202611271238';
-import { mathQuestion, mathById, levelOfEra, pickTier } from './data-math.js?v=202611271238';
-import { engById, ENG_IDS, ENG_TYPES, ENG_TIER } from './data-english.js?v=202611271238';
+import { QUIZZES, QZ } from './data-quizzes.js?v=202611271250';
+import { RELICS, R } from './data-relics.js?v=202611271250';
+import { BUILDINGS, B } from './data-buildings.js?v=202611271250';
+import { HEROES, H } from './data-heroes.js?v=202611271250';
+import { BAL, HISTORY_ERA } from './data-config.js?v=202611271250';
+import { mathQuestion, mathById, levelOfEra, pickTier } from './data-math.js?v=202611271250';
+import { engById, ENG_IDS, ENG_TYPES, ENG_TIER } from './data-english.js?v=202611271250';
 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const pick = a => a[Math.floor(Math.random() * a.length)];

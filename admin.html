@@ -116,6 +116,13 @@
     </section>
 
     <section class="card">
+      <h2>전체 공지 <small>게임을 켠 모든 학생 화면 위쪽에 크게 떠요 (15초)</small></h2>
+      <div class="srv"><input type="text" id="annIn" maxlength="60" placeholder="예: 새 위인 30명이 추가됐어요! ‘위인’에서 확인해 보세요" style="flex:3 1 320px"><button class="btn gold" id="btnAnn" style="font-size:16px;padding:9px 16px">공지 보내기</button></div>
+      <p class="note" style="margin:6px 0 0" id="annLast">아직 보낸 공지가 없어요.</p>
+      <p class="note" style="margin:2px 0 0">게임을 하고 있는 학생에게 바로 떠요. 30분 안에 새로 들어온 학생에게도 한 번 보여요.</p>
+    </section>
+
+    <section class="card">
       <h2>새 주소 <small>GitHub로 이사했어요</small></h2>
       <div class="srv"><div class="srv-state" style="flex:2 1 320px"><b style="font-size:17px;color:#2f6aa8" id="newUrl"></b></div></div>
       <div class="srv" style="margin-top:8px"><div class="srv-state" style="flex:2 1 320px"><span class="dim" id="oldTxt">옛 주소 상태 확인 중…</span></div><button class="btn small red" id="btnOldSite">옛 주소 닫고 새 주소 안내</button></div>
@@ -169,6 +176,6 @@
 <div class="bk-modal hidden" id="bkModal"><div class="card bk-card"><h2>저장 기록 — <span id="bkName"></span><button class="btn small gray" style="margin-left:auto" onclick="document.getElementById('bkModal').classList.add('hidden')">닫기</button></h2>
   <p class="note" style="margin-top:0">진행이 갑자기 되돌아간 학생은 여기서 앞선 기록을 골라 되돌릴 수 있어요. 기록은 학생이 ‘저장’ 버튼을 누를 때와 시대를 돌파할 때 남아요.</p>
   <div class="tbl" id="bkBox"></div></div></div>
-<script type="module" src="js/admin.js?v=202611271238"></script>
+<script type="module" src="js/admin.js?v=202611271250"></script>
 </body>
 </html>

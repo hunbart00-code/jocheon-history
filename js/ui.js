@@ -1,21 +1,21 @@
 // =============================================================
 //  화면(UI) — HUD, 모달 창, 퀴즈 3모드, 시대 돌파, 위인·유물·연구소·대역사
 // =============================================================
-import * as E from './economy.js?v=202611271238';
-import * as GM from './game.js?v=202611271238';
-import { G } from './game.js?v=202611271238';
-import * as S from './sprites.js?v=202611271238';
-import { VERSION } from './mode.js?v=202611271238';
-import * as Q from './quiz.js?v=202611271238';
-import { sfx, setBgm, setSfx } from './audio.js?v=202611271238';
-import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271238';
-import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271238';
-import { HEROES, H } from './data-heroes.js?v=202611271238';
-import { TECHS, T } from './data-techs.js?v=202611271238';
-import { RELICS, R, RARITY } from './data-relics.js?v=202611271238';
-import { QZ } from './data-quizzes.js?v=202611271238';
-import { sync } from './sync.js?v=202611271238';
-import { Renderer } from './render.js?v=202611271238';
+import * as E from './economy.js?v=202611271250';
+import * as GM from './game.js?v=202611271250';
+import { G } from './game.js?v=202611271250';
+import * as S from './sprites.js?v=202611271250';
+import { VERSION } from './mode.js?v=202611271250';
+import * as Q from './quiz.js?v=202611271250';
+import { sfx, setBgm, setSfx } from './audio.js?v=202611271250';
+import { ERAS, BAL, BOSSES, EXPAND, MAX_ERA } from './data-config.js?v=202611271250';
+import { BUILDINGS, B, DECOR, D, SYNERGIES, WONDER } from './data-buildings.js?v=202611271250';
+import { HEROES, H } from './data-heroes.js?v=202611271250';
+import { TECHS, T } from './data-techs.js?v=202611271250';
+import { RELICS, R, RARITY } from './data-relics.js?v=202611271250';
+import { QZ } from './data-quizzes.js?v=202611271250';
+import { sync } from './sync.js?v=202611271250';
+import { Renderer } from './render.js?v=202611271250';
 
 export const ctx = { renderer: null, startPlace: null, endPlace: null, pendingTile: null };
 const $ = id => document.getElementById(id);
@@ -653,6 +653,16 @@ export function fullHelp(ios) {
     ${ios ? `<ol class="fh-steps"><li>사파리 아래쪽 <b>공유</b> 버튼(네모에 화살표)을 눌러요</li><li><b>홈 화면에 추가</b>를 눌러요</li><li>홈 화면에 생긴 <b>히스토리 빌더</b> 아이콘으로 들어와요</li></ol>
     <p class="muted">처음 한 번은 학급 코드·번호·이름을 다시 넣으면 내 마을이 그대로 이어져요.</p>` : '<p>크롬에서 열면 전체 화면으로 할 수 있어요.</p>'}
     <button class="btn gold" data-close style="font-size:1.2em;margin-top:.4em">알겠어요</button></div>`, 'narrow');
+}
+
+// 선생님 전체 공지 (세계 공지) — 화면 위쪽에 띠로 15초
+export function worldNotice(text) {
+  document.querySelector('.world-notice')?.remove();
+  const el = document.createElement('div'); el.className = 'world-notice'; el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="wn-ic"><svg viewBox="0 0 24 24"><path d="M3 10v4l3 1 2 5h2l-1-4.4L18 19V5L6 9z" fill="currentColor"/><path d="M20.5 9.5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><b>선생님 공지</b><span class="wn-txt">${esc(text)}</span><button class="wn-x" aria-label="닫기">✕</button>`;
+  document.body.appendChild(el); sfx('rare');
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 400); };
+  el.onclick = close; setTimeout(close, 15000);
 }
 
 // 첫 화면의 ‘새 소식’

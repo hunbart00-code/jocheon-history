@@ -1,21 +1,21 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271238';
-import { G } from './game.js?v=202611271238';
-import * as UI from './ui.js?v=202611271238';
-import { ctx } from './ui.js?v=202611271238';
-import { Renderer } from './render.js?v=202611271238';
-import * as S from './sprites.js?v=202611271238';
-import * as E from './economy.js?v=202611271238';
-import { B, D } from './data-buildings.js?v=202611271238';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271238';
-import { sync } from './sync.js?v=202611271238';
-import { preloadImages, uiImages } from './images.js?v=202611271238';
-import { initSocial } from './social.js?v=202611271238';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271238';
-import * as Title from './title.js?v=202611271238';
-import * as FS from './fullscreen.js?v=202611271238';
+import * as GM from './game.js?v=202611271250';
+import { G } from './game.js?v=202611271250';
+import * as UI from './ui.js?v=202611271250';
+import { ctx } from './ui.js?v=202611271250';
+import { Renderer } from './render.js?v=202611271250';
+import * as S from './sprites.js?v=202611271250';
+import * as E from './economy.js?v=202611271250';
+import { B, D } from './data-buildings.js?v=202611271250';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271250';
+import { sync } from './sync.js?v=202611271250';
+import { preloadImages, uiImages } from './images.js?v=202611271250';
+import { initSocial } from './social.js?v=202611271250';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271250';
+import * as Title from './title.js?v=202611271250';
+import * as FS from './fullscreen.js?v=202611271250';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -248,9 +248,18 @@ const withTimeout = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() =
 
 // ---------- 선생님이 ‘모든 학생 새로고침’을 누르면 → 저장하고 새 버전으로 ----------
 // 처음 받은 값은 기준으로만 쓰고, 그 뒤에 값이 바뀔 때만 새로고침해요 (크롬북 시계가 달라도 괜찮아요)
-let firstReloadAt = null, updating = false;
+let firstReloadAt = null, firstAnnAt = null, updating = false;
+const ANN_KEY = 'hb.annSeen';
 function onGlobal(g) {
   UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg);
+  // 선생님 전체 공지: 들어와 있는 동안 새로 온 공지 + 들어오기 30분 안에 보낸 공지(아직 안 본 것)
+  const a = g.annAt || 0;
+  if (a && g.annText) {
+    let seen = 0; try { seen = Number(localStorage.getItem(ANN_KEY) || 0); } catch (e) {}
+    const fresh = firstAnnAt === null ? (a > seen && Date.now() - a < 30 * 60000) : a > firstAnnAt;
+    if (fresh && a > seen) { try { localStorage.setItem(ANN_KEY, String(a)); } catch (e) {} UI.worldNotice(g.annText); }
+  }
+  if (firstAnnAt === null || a > firstAnnAt) firstAnnAt = a;
   const r = g.reloadAt || 0;
   if (firstReloadAt === null) { firstReloadAt = r; return; }
   if (r > firstReloadAt && !updating) { updating = true; updateToNew(r); }

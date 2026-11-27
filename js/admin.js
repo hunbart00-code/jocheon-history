@@ -5,9 +5,9 @@
 //   chats/{학급코드}/msgs : 최근 50개 보기 · 지우기
 //  누가 선생님인지는 Firestore 보안 규칙이 정해요 (teacher/check 문서를 읽을 수 있으면 선생님).
 // =============================================================
-import { firebaseConfig } from './firebase-config.js?v=202611271238';
-import { ERAS, MAX_ERA } from './data-config.js?v=202611271238';
-import { badWord } from './badwords.js?v=202611271238';
+import { firebaseConfig } from './firebase-config.js?v=202611271250';
+import { ERAS, MAX_ERA } from './data-config.js?v=202611271250';
+import { badWord } from './badwords.js?v=202611271250';
 
 const CDN = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const $ = id => document.getElementById(id);
@@ -80,6 +80,13 @@ function load(raw) {
 function watchServer() {
   F.onSnapshot(F.doc(db, 'config', 'server'), snap => { glob = snap.exists() ? snap.data() : {}; drawServer(); }, e => console.warn(e));
   F.onSnapshot(F.doc(db, 'config', 'global'), snap => { oldSite = snap.exists() ? snap.data() : {}; drawOldSite(); }, e => console.warn(e));
+  $('btnAnn').onclick = async () => {
+    const text = $('annIn').value.trim().slice(0, 60);
+    if (!text) { toast('공지할 글을 써 주세요'); $('annIn').focus(); return; }
+    try { await F.setDoc(F.doc(db, 'config', 'server'), { annText: text, annAt: Date.now() }, { merge: true }); toast('모든 학생 화면에 공지를 보냈어요'); $('annIn').value = ''; }
+    catch (e) { console.warn(e); toast('보내지 못했어요. 선생님 계정을 확인해 주세요.'); }
+  };
+  $('annIn').onkeydown = e => { if (e.key === 'Enter') $('btnAnn').click(); };
   $('btnUpdate').onclick = async () => {
     if (!confirm('게임을 켜 놓은 모든 학생 화면을 새 버전으로 새로고침할까요?\n(저장한 뒤 바뀌고, 진행은 그대로 이어져요)')) return;
     try { await F.setDoc(F.doc(db, 'config', 'server'), { reloadAt: Date.now() }, { merge: true }); toast('모든 학생 화면에 새로고침 신호를 보냈어요'); }
@@ -117,6 +124,7 @@ function drawServer() {
   $('btnServer').textContent = c ? '서버 열기' : '서버 닫기';
   $('btnServer').className = `btn ${c ? 'green' : 'red'}`;
   if (document.activeElement !== $('srvMsg')) $('srvMsg').value = glob.msg || '';
+  if ($('annLast')) $('annLast').textContent = glob.annAt && glob.annText ? `마지막 공지 (${new Date(glob.annAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}): ${glob.annText}` : '아직 보낸 공지가 없어요.';
   if ($('updSub')) $('updSub').textContent = glob.reloadAt ? `마지막으로 보낸 때: ${new Date(glob.reloadAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : '게임을 새로 고쳐 올렸을 때 눌러요.';
 }
 
