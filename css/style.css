@@ -52,29 +52,29 @@ img.ico { image-rendering: pixelated; width: 2.2em; height: 2.2em; }
 .taegeuk { width: 2.9em; height: 2.9em; filter: drop-shadow(0 0.15em 0 rgba(42,23,10,0.6)); animation: tgk 9s linear infinite; }
 @keyframes tgk { to { transform: rotate(360deg); } }
 .col { display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.6em; }
-.era-name { font-size: 1.7em; padding: 0.36em 1.1em 0.4em; justify-content: center; min-width: 9.5em; white-space: nowrap; }
-.player { cursor: pointer; padding: 0.42em 0.9em 0.46em 0.55em; }
-.player img { width: 2.8em; height: 2.8em; image-rendering: pixelated; background: #f3e6c4; border-radius: 0.4em; border: 0.15em solid var(--trim); }
-.player div { display: flex; flex-direction: column; line-height: 1.15; }
-.player small { font-size: 0.95em; opacity: 0.9; }
-.player b { font-size: 1.45em; font-weight: normal; }
+.hud-top .era-name { font-size: 1.7em; padding: 0.36em 1.1em 0.4em; justify-content: center; min-width: 9.5em; white-space: nowrap; }
+.hud-top .player { cursor: pointer; padding: 0.42em 0.9em 0.46em 0.55em; }
+.hud-top .player img { width: 2.8em; height: 2.8em; image-rendering: pixelated; background: #f3e6c4; border-radius: 0.4em; border: 0.15em solid var(--trim); }
+.hud-top .player div { display: flex; flex-direction: column; line-height: 1.15; }
+.hud-top .player small { font-size: 0.95em; opacity: 0.9; }
+.hud-top .player b { font-size: 1.45em; font-weight: normal; }
 .gold-wrap { margin: 0.6em auto 0; display: flex; flex-direction: column; align-items: center; gap: 0.2em; }
-.gold { font-size: 2em; padding: 0.34em 0.9em 0.38em 0.5em; min-width: 8.8em; white-space: nowrap; justify-content: center; position: relative; }
-.gold img.ico { width: 1.3em; height: 1.3em; }
-.gold:active { transform: scale(0.97); }
-.gold.flash { animation: flash 0.5s; }
+.hud-top .gold { font-size: 2em; padding: 0.34em 0.9em 0.38em 0.5em; min-width: 8.8em; white-space: nowrap; justify-content: center; position: relative; }
+.hud-top .gold img.ico { width: 1.3em; height: 1.3em; }
+.hud-top .gold:active { transform: scale(0.97); }
+.hud-top .gold.flash { animation: flash 0.5s; }
 @keyframes flash { 50% { filter: brightness(1.6); transform: scale(1.06); } }
-.rate { font-size: 1.15em; padding: 0.34em 0.85em 0.42em; flex-direction: column; gap: 0.15em; border-radius: 0 0 0.7em 0.7em; }
-.rate.fever-on #rate { color: #ffde59; }
+.hud-top .rate { font-size: 1.15em; padding: 0.34em 0.85em 0.42em; flex-direction: column; gap: 0.15em; border-radius: 0 0 0.7em 0.7em; }
+.hud-top .rate.fever-on #rate { color: #ffde59; }
 .store { width: 9em; height: 0.85em; background: #24130a; border-radius: 0.5em; position: relative; overflow: hidden; box-shadow: inset 0 0 0 0.1em #000; }
 .store i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #ffd84a, #f08a1a); border-radius: 0.5em; transition: width 0.3s; }
 .store em { position: absolute; inset: 0; font-style: normal; font-size: 0.65em; display: grid; place-items: center; color: #fff; }
 .store.full i { background: linear-gradient(90deg, #ff7a5a, #e8443a); animation: pulse 0.8s infinite; }
 @keyframes pulse { 50% { opacity: 0.6; } }
 .right { margin-top: 0.6em; display: flex; gap: 0.5em; align-items: center; }
-.kp { font-size: 1.9em; padding: 0.32em 0.8em 0.36em 0.48em; white-space: nowrap; }
-.kp img.ico, .fame img.ico { width: 1.25em; height: 1.25em; }
-.fame { font-size: 1.3em; padding: 0.36em 0.75em 0.4em 0.5em; white-space: nowrap; }
+.hud-top .kp { font-size: 1.9em; padding: 0.32em 0.8em 0.36em 0.48em; white-space: nowrap; }
+.hud-top .kp img.ico, .hud-top .fame img.ico { width: 1.25em; height: 1.25em; }
+.hud-top .fame { font-size: 1.3em; padding: 0.36em 0.75em 0.4em 0.5em; white-space: nowrap; }
 .gear { width: 3.6em; height: 3.6em; padding: 0; border-radius: 50%; justify-content: center; background: radial-gradient(circle at 35% 30%, #8a5a30, var(--wood) 70%); }
 .gear img.ico { width: 2.5em; height: 2.5em; filter: drop-shadow(0 0.12em 0 rgba(0,0,0,0.45)); transition: transform 0.4s cubic-bezier(.3,1.5,.5,1); }
 .gear:hover img.ico { transform: rotate(60deg) scale(1.08); }
@@ -394,7 +394,7 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
   .b-panel { bottom: calc(8em + var(--badge)); }
 }
 @media (max-width: 760px) {
-  .fame { display: none; }
+  .hud-top .fame { display: none; }
   .big .lbl small { display: none; }
   .modes { grid-template-columns: 1fr; }
   .relic-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -556,9 +556,9 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
 /* ================= 휴대폰 가로 (낮은 화면) ================= */
 @media (max-height: 520px) {
   .hud-top { gap: 0.5em; }
-  .era-name { font-size: 1.45em; min-width: 8em; }
-  .gold { font-size: 1.7em; min-width: 7em; }
-  .kp { font-size: 1.6em; }
+  .hud-top .era-name { font-size: 1.45em; min-width: 8em; }
+  .hud-top .gold { font-size: 1.7em; min-width: 7em; }
+  .hud-top .kp { font-size: 1.6em; }
   .side-tools { top: 8.4em; gap: 0.25em; }
   .tool { width: 4.6em; }
   .tool .t-ic { width: 3.1em; height: 3.1em; } .tool .t-ic img.ico { width: 2.3em; height: 2.3em; }
@@ -764,25 +764,25 @@ body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
 .gold-wrap { margin: var(--top) auto 0; gap: var(--hgap); width: var(--colw); align-items: stretch; flex: none; }
 .right { margin-top: var(--top); gap: 0.5em; align-items: stretch; flex: none; }
 .hud-top .panel { font-size: 1em; height: var(--row); min-width: 0; box-sizing: border-box; }
-.era-name { width: 100%; padding: 0 0.9em; justify-content: center; }
-.era-name span { font-size: 1.55em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player { width: 100%; padding: 0 0.9em 0 0.65em; gap: 0.55em; }
-.player img { width: 2.3em; height: 2.3em; flex: none; }
-.player div { min-width: 0; line-height: 1.15; }
-.player small { font-size: 0.82em; }
-.player b { font-size: 1.28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gold { width: 100%; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
-.gold img.ico { width: 2em; height: 2em; flex: none; }
+.hud-top .era-name { width: 100%; padding: 0 0.9em; justify-content: center; }
+.hud-top .era-name span { font-size: 1.55em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-top .player { width: 100%; padding: 0 0.9em 0 0.65em; gap: 0.55em; }
+.hud-top .player img { width: 2.3em; height: 2.3em; flex: none; }
+.hud-top .player div { min-width: 0; line-height: 1.15; }
+.hud-top .player small { font-size: 0.82em; }
+.hud-top .player b { font-size: 1.28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-top .gold { width: 100%; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
+.hud-top .gold img.ico { width: 2em; height: 2em; flex: none; }
 #gold { font-size: 1.7em; }
-.rate { padding: 0.5em 1em 0.55em; gap: 0.3em; justify-content: center; border-radius: 0.8em; }
+.hud-top .rate { padding: 0.5em 1em 0.55em; gap: 0.3em; justify-content: center; border-radius: 0.8em; }
 #rate { font-size: 1.05em; line-height: 1.1; }
-.rate .store { width: 100%; height: 0.95em; }
-.rate .store em { font-size: 0.72em; }
-.kp { min-width: 9.8em; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
-.kp img.ico { width: 2em; height: 2em; flex: none; }
+.hud-top .rate .store { width: 100%; height: 0.95em; }
+.hud-top .rate .store em { font-size: 0.72em; }
+.hud-top .kp { min-width: 9.8em; padding: 0 0.9em 0 0.7em; gap: 0.5em; justify-content: center; }
+.hud-top .kp img.ico { width: 2em; height: 2em; flex: none; }
 #kp { font-size: 1.55em; }
-.fame { min-width: 6.2em; padding: 0 0.8em 0 0.65em; gap: 0.4em; justify-content: center; }
-.fame img.ico { width: 1.8em; height: 1.8em; flex: none; }
+.hud-top .fame { min-width: 6.2em; padding: 0 0.8em 0 0.65em; gap: 0.4em; justify-content: center; }
+.hud-top .fame img.ico { width: 1.8em; height: 1.8em; flex: none; }
 #fame { font-size: 1.35em; }
 .hud-top .gear { width: var(--row); height: var(--row); flex: none; }
 .hud-top .gear img.ico { width: 2.3em; height: 2.3em; }
@@ -809,9 +809,9 @@ body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
 @media (max-height: 520px) {
   :root { --row: 3.3em; --colw: 14.6em; --hgap: 0.35em; --top: 0.45em; --side: 0.6em; --btnh: 4.5em; }
   .ribbon { height: 7.8em; }
-  .era-name span { font-size: 1.4em; }
+  .hud-top .era-name span { font-size: 1.4em; }
   #gold { font-size: 1.55em; } #kp { font-size: 1.4em; } #fame { font-size: 1.2em; }
-  .kp { min-width: 8.6em; } .fame { min-width: 5.6em; }
+  .hud-top .kp { min-width: 8.6em; } .fame { min-width: 5.6em; }
   .side-tools { gap: 0.3em; }
   .tool { width: 4.6em; }
   .tool .t-ic { width: 3em; height: 3em; } .tool .t-ic img.ico { width: 2.15em; height: 2.15em; }

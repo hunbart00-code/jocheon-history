@@ -248,8 +248,8 @@ const RAW = [
   ['q7_35', 7, 'sa', '우리나라 최초의 철도 이름은?', ['경인선'], '1899년에 개통했어요.'],
 ];
 
-import { RAW2 } from './data-quizzes2.js?v=202611271256';
-import { RAW3 } from './data-quizzes3.js?v=202611271256';
+import { RAW2 } from './data-quizzes2.js?v=202611271306';
+import { RAW3 } from './data-quizzes3.js?v=202611271306';
 
 // 5학년 2학기 사회(2022 개정) 교과서 범위를 벗어나거나 너무 지엽적인 문제, 겹치는 문제는 빼요
 const OUT = new Set(`
