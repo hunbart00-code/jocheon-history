@@ -120,7 +120,7 @@ export function updateHud(force = false) {
   $('storeBar').style.width = Math.min(100, ratio * 100) + '%';
   $('storeTxt').textContent = ratio >= 0.999 ? '창고 가득!' : `창고 ${F(s.storage)}`;
   document.querySelector('.store').classList.toggle('full', ratio >= 0.999);
-  $('eraNum').textContent = s.era + '단계';
+  $('eraNum').textContent = s.era + '단계'; $('eraNum').classList.toggle('long', s.era >= 10);
   $('eraName').textContent = s.completed ? '역사 완성!' : ERAS[s.era].name;
   $('pName').textContent = s.name || '이름'; $('pNo').textContent = s.teacher ? `테스트 마을 · ${s.classCode}` : `출석번호 ${s.studentNo || 0}번`;
   // 돌파 게이지
