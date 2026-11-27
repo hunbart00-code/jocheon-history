@@ -431,7 +431,7 @@ function chars(t) {
 const SVG = {
   sound: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="on" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path class="off" d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   news: '<svg viewBox="0 0 24 24"><path d="M3 10v4l3 1 2 5h2l-1-4.4L18 19V5L6 9z" fill="currentColor"/><path d="M20.5 9.5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-  full: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>',
+  full: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path class="on" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="off" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>',
 };
 function logoSVG() {
   const dots = Array.from({ length: 10 }, (_, i) => {
@@ -458,6 +458,11 @@ function logoSVG() {
     </g></svg>`;
 }
 
+// 처음 불러오는 동안 덮어 두는 어두운 화면 (첫 화면이 그 위로 나타난 뒤 걷어요)
+export function hideSplash(delay = 0) {
+  const sp = document.getElementById('splash'); if (!sp) return;
+  setTimeout(() => { sp.classList.add('gone'); setTimeout(() => sp.remove(), 500); }, delay);
+}
 export function show(opt = {}) {
   root = document.createElement('div'); root.className = 'title'; root.id = 'title';
   root.innerHTML = `<canvas class="title-cv" aria-hidden="true"></canvas>
@@ -472,6 +477,7 @@ export function show(opt = {}) {
     <button class="t-start" id="tStart" type="button"><span id="tStartLb">게임 시작</span></button>`;
   (document.getElementById('app') || document.body).appendChild(root);
   document.body.classList.add('title-on');
+  hideSplash(900);
   cv = root.querySelector('canvas'); g = cv.getContext('2d');
   layout(); running = true; t0 = performance.now(); lastDraw = 0; raf = requestAnimationFrame(drawFrame);
   const onResize = () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (running) layout(); }, 150); };
@@ -487,12 +493,14 @@ export function show(opt = {}) {
       else { who.textContent = '처음 왔나요? 학급 코드와 번호를 넣어요'; who.classList.add('new'); av.classList.add('hidden'); chg.innerHTML = '정보 넣기 <b>❯</b>'; }
     },
     ready(fn) { ready = fn; if (!busy) lb.textContent = '게임 시작'; startBtn.classList.remove('wait'); },
+    setFull(on) { const b = root?.querySelector('[data-act="full"]'); if (b) { b.classList.toggle('muted', !!on); b.title = b.ariaLabel = on ? '전체 화면 끄기' : '전체 화면'; } },
     busy(text) { busy = true; lb.textContent = text; startBtn.classList.add('busy'); },
     idle() { busy = false; lb.textContent = ready ? '게임 시작' : '연결 중…'; startBtn.classList.remove('busy'); },
+    // 로고는 위로, 버튼은 아래로 빠지고 → 섬 쪽으로 다가가며 마을 화면으로 스르르 바뀌어요
     hide() {
-      if (!root) return; const el = root; running = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize);
-      document.body.classList.remove('title-on'); el.classList.add('out'); setTimeout(() => el.remove(), 600);
-      root = null; L = null; smoke = [];
+      if (!root) return; const el = root; root = null; window.removeEventListener('resize', onResize);
+      document.body.classList.remove('title-on'); el.classList.add('out');
+      setTimeout(() => { running = false; cancelAnimationFrame(raf); el.remove(); L = null; smoke = []; }, 1000);
     },
   };
   if (!opt.waitReady) ctl.ready(null); else { lb.textContent = '연결 중…'; startBtn.classList.add('wait'); }
@@ -508,12 +516,8 @@ export function show(opt = {}) {
     const act = b.dataset.act;
     if (act === 'news') opt.onNews?.();
     if (act === 'sound') { soundOn = !soundOn; b.classList.toggle('muted', !soundOn); opt.onSound?.(soundOn); }
-    if (act === 'full') {
-      const de = document.documentElement;
-      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-      else de.requestFullscreen?.({ navigationUI: 'hide' }).then(() => screen.orientation?.lock?.('landscape').catch(() => {})).catch(() => {});
-    }
+    if (act === 'full') opt.onFull?.();
   });
-  if (!document.documentElement.requestFullscreen) root.querySelector('[data-act="full"]').remove();
+  if (opt.hideFull) root.querySelector('[data-act="full"]').remove();
   return ctl;
 }

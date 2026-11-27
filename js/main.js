@@ -15,6 +15,7 @@ import { preloadImages, uiImages } from './images.js';
 import { initSocial } from './social.js';
 import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js';
 import * as Title from './title.js';
+import * as FS from './fullscreen.js';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -181,6 +182,19 @@ async function manualSave() {
   } else UI.toast({ stale: '이 마을이 다른 곳에서도 열려 있어요. ‘여기서 이어 하기’를 눌러 주세요.', closed: '선생님이 서버를 닫아 두어서 지금은 저장할 수 없어요.', offline: '학급 서버에 연결되지 않았어요.' }[r.why] || '저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.', 'bad');
 }
 btn('btnSave', manualSave);
+// 전체 화면 버튼 (아이폰은 ‘홈 화면에 추가’ 안내)
+function fullAction() {
+  if (!FS.fsSupported()) { UI.fullHelp(FS.isIOS()); return; }
+  FS.toggleFull();
+}
+function showFullState() {
+  const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const im = $('btnFull')?.querySelector('img'); if (im) im.src = S.iconURL(on ? 'unfull' : 'full');
+  if ($('btnFull')) $('btnFull').title = on ? '전체 화면 끄기' : '전체 화면';
+  T?.setFull(on);
+}
+if (FS.isStandalone()) $('btnFull')?.remove();   // 홈 화면 앱으로 열면 이미 꽉 찬 화면
+else { btn('btnFull', fullAction); FS.onFullChange(showFullState); }
 btn('btnProfile', () => { if (G.s?.teacher) UI.openSettings(); else UI.startScreen(true); });
 $('btnGold').addEventListener('click', () => { unlockAudio(); ctx.collect(); });
 $('goal').addEventListener('click', UI.goalClick);
@@ -295,6 +309,7 @@ function applySkins() {
   const st = document.createElement('style'); st.id = 'uiSkins'; st.textContent = css; document.head.appendChild(st);
 }
 
+setTimeout(() => Title.hideSplash(), 8000);   // 혹시 첫 화면이 못 떠도 화면이 막히지 않게
 // 선생님이 넣은 그림(img 폴더)을 먼저 불러온 뒤 첫 화면 → ‘게임 시작’
 let T = null, pendingBgm = null;
 const profileView = () => {
@@ -305,7 +320,10 @@ const profileView = () => {
 const linked = () => !!(G.s && G.s.classCode && G.s.studentNo);
 function enterGame() {
   if (pendingBgm !== null && G.s) { G.s.settings.bgm = pendingBgm; pendingBgm = null; }
-  T?.hide(); T = null; boot();
+  const t = T; T = null;
+  document.body.classList.add('entering'); boot();          // 마을을 먼저 그려 두고
+  requestAnimationFrame(() => requestAnimationFrame(() => t?.hide()));   // 첫 화면을 걷어내요
+  setTimeout(() => document.body.classList.remove('entering'), 1800);
 }
 // 학급 코드·번호·이름을 넣는 창 (처음 온 친구 · 서버에 연결되지 않았던 마을)
 function openProfileForm() {
@@ -313,6 +331,7 @@ function openProfileForm() {
   UI.startScreen(false, (profile, err) => linkProfile(profile, err).then(ok => { if (ok) enterGame(); return ok; }), { onCancel: () => T?.idle() });
 }
 async function startGame() {
+  FS.enterFull();   // ‘게임 시작’을 누르면 전체 화면으로 (지원하는 브라우저만)
   if (G.s && linked() && sync.enabled) {
     T?.busy('마을 불러오는 중…');
     const cloud = await sync.fetchVillage(G.s.classCode, G.s.studentNo);
@@ -331,7 +350,7 @@ preloadImages().then(async n => {
   if (TEACHER_MODE) {
     const online = sync.configured ? await withTimeout(sync.init(), 9000) : false;
     if (online) sync.watchGlobal(g => UI.showClosed(g.closed && !(TEACHER_MODE && sync.isTeacher), g.msg));
-    await teacherBoot(online); return;
+    await teacherBoot(online); Title.hideSplash(); return;
   }
   GM.load();
   T = Title.show({
@@ -340,6 +359,7 @@ preloadImages().then(async n => {
     onSound: on => { setBgm(on); if (G.s) { G.s.settings.bgm = on; GM.save('settings'); } else pendingBgm = on; },
     onNews: () => UI.newsModal(),
     onProfile: editProfile,
+    onFull: fullAction, hideFull: FS.isStandalone(),
   });
   T.setProfile(profileView());
   T.setStatus(sync.configured ? 'wait' : 'local');

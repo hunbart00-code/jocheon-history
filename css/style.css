@@ -626,9 +626,9 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
 
 /* ---------- 첫 화면 (타이틀) ---------- */
 .title { position: fixed; inset: 0; z-index: 12; background: #060920; overflow: hidden; font-family: 'Jua', sans-serif; color: #fff; --tu: min(1vh, 0.62vw); --tu: min(1dvh, 0.62vw); animation: fade 0.5s; }
-.title.out { opacity: 0; transition: opacity 0.55s; pointer-events: none; }
+
 .title-cv { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.t-logo { position: absolute; left: calc(var(--tu) * 2.4); top: calc(var(--tu) * 1.6); width: calc(var(--tu) * 58); filter: drop-shadow(0 calc(var(--tu) * 0.6) calc(var(--tu) * 0.8) rgba(0,0,0,0.55)); animation: t-float 5s ease-in-out infinite; pointer-events: none; }
+.t-logo { position: absolute; left: calc(var(--tu) * 2.4); top: calc(var(--tu) * 1.6); width: calc(var(--tu) * 58); filter: drop-shadow(0 calc(var(--tu) * 0.6) calc(var(--tu) * 0.8) rgba(0,0,0,0.55)); animation: t-in-top 0.8s 0.15s cubic-bezier(.2,.9,.3,1.15) both, t-float 5s 1s ease-in-out infinite; pointer-events: none; }
 .t-logo svg { display: block; width: 100%; height: auto; overflow: visible; }
 .t-ver { position: absolute; right: calc(var(--tu) * 3); top: calc(var(--tu) * 2.4); font-size: calc(var(--tu) * 2.6); color: #fff; text-shadow: 0 0 0.25em #000, 0 0.08em 0 #000; letter-spacing: 0.02em; }
 .t-side { position: absolute; right: calc(var(--tu) * 3); top: calc(var(--tu) * 8); display: flex; flex-direction: column; gap: calc(var(--tu) * 1.8); }
@@ -671,3 +671,74 @@ textarea.code { width: 100%; height: 6em; font-family: monospace; font-size: 0.8
 .news-list li div { display: flex; flex-direction: column; min-width: 0; }
 .news-list li b { font-family: 'Jua'; font-weight: normal; font-size: 1.25em; color: #7a2f14; }
 .news-list li span { font-size: 1.02em; }
+.full-btn:hover img.ico { transform: scale(1.1); }
+.full-btn img.ico { width: 2.2em; height: 2.2em; }
+
+/* ---------- 앱(카카오톡 등) 안에서 열었을 때 → 크롬으로 ---------- */
+.inapp { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 12px; overflow: auto; background: radial-gradient(circle at 50% 30%, #1d2a66, #060920 75%); color: #f3e6c4; font-family: 'Jua', 'Malgun Gothic', sans-serif; text-align: center; }
+.inapp-card { max-width: 26rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.inapp-ic { width: 54px; height: 54px; }
+.inapp b { font-weight: normal; color: #ffe07a; }
+.inapp-card > b { font-size: 24px; }
+.inapp p { margin: 0; font-size: 16px; line-height: 1.5; font-family: 'Gowun Dodum', 'Jua', 'Malgun Gothic', sans-serif; }
+.inapp p.small { font-size: 13px; opacity: 0.75; }
+.inapp .steps { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,224,122,0.5); border-radius: 12px; padding: 8px 14px; }
+.inapp .go { font: inherit; font-size: 21px; padding: 10px 34px; border-radius: 999px; border: 0; cursor: pointer; color: #3a1a05; background: linear-gradient(#ffe27a, #f2a722); box-shadow: 0 4px 0 #a8650f, 0 0 18px rgba(255,200,90,0.45); }
+.inapp .go:active { transform: translateY(2px); box-shadow: 0 2px 0 #a8650f; }
+.inapp .copy { font: inherit; font-size: 15px; padding: 7px 18px; border-radius: 999px; cursor: pointer; color: #f3e6c4; background: rgba(255,255,255,0.08); border: 1px solid rgba(243,230,196,0.5); max-width: 90vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inapp .stay { font: inherit; font-size: 13px; background: none; border: 0; color: #9aa3c8; text-decoration: underline; cursor: pointer; }
+.fh-steps { text-align: left; margin: 0.6em auto; padding-left: 1.6em; max-width: 26em; font-size: 1.1em; line-height: 1.7; }
+.fh-steps b { font-family: 'Jua'; font-weight: normal; color: #7a2f14; }
+
+/* ---------- 화면 전환 ---------- */
+/* 첫 화면 들어올 때: 로고는 위에서, 아이콘은 오른쪽에서, 이름 줄·게임 시작은 아래에서 */
+.t-side { animation: t-in-right 0.7s 0.35s cubic-bezier(.2,.9,.3,1.15) both; }
+.t-ver { animation: hb-fadein 0.8s 0.4s both; }
+.t-bar { animation: t-in-bottom 0.7s 0.45s cubic-bezier(.2,.9,.3,1.15) both; }
+.t-start { animation: t-in-bottom 0.7s 0.6s cubic-bezier(.2,.9,.3,1.15) both; }
+@keyframes t-in-top { from { translate: 0 -140%; opacity: 0; } }
+@keyframes t-in-bottom { from { translate: 0 220%; opacity: 0; } }
+@keyframes t-in-right { from { translate: 180% 0; opacity: 0; } }
+@keyframes hb-fadein { from { opacity: 0; } }
+/* 첫 화면 → 마을: 로고는 위로, 버튼은 아래로 빠지고 섬 쪽으로 다가가며 디졸브 */
+.title.out { pointer-events: none; transform-origin: 55% 42%; animation: t-out 0.95s cubic-bezier(.55,0,.6,1) forwards; }
+.title.out .t-logo { animation: t-to-top 0.4s ease-in forwards; }
+.title.out .t-side, .title.out .t-ver { animation: t-to-right 0.35s ease-in forwards; }
+.title.out .t-bar { animation: t-to-bottom 0.4s ease-in forwards; }
+.title.out .t-start { animation: t-to-bottom 0.4s 0.05s ease-in forwards; }
+@keyframes t-out { 0% { opacity: 1; scale: 1; } 22% { opacity: 1; } 100% { opacity: 0; scale: 1.18; } }
+@keyframes t-to-top { to { translate: 0 -160%; opacity: 0; } }
+@keyframes t-to-bottom { to { translate: 0 260%; opacity: 0; } }
+@keyframes t-to-right { to { translate: 180% 0; opacity: 0; } }
+/* 마을 화면이 내려앉고, 위 줄은 위에서·아래 버튼은 아래에서·양옆은 옆에서 들어와요 */
+body.entering #world { animation: hb-land 1.2s cubic-bezier(.2,.7,.2,1) both; }
+body.entering .hud-top { animation: hb-from-top 0.65s 0.5s cubic-bezier(.2,.9,.3,1.15) both; }
+body.entering .bottom { animation: hb-from-bottom 0.65s 0.55s cubic-bezier(.2,.9,.3,1.15) both; }
+body.entering .side-tools { animation: hb-from-left 0.6s 0.65s cubic-bezier(.2,.9,.3,1.15) both; }
+body.entering .gauge { animation: hb-from-right 0.6s 0.65s cubic-bezier(.2,.9,.3,1.15) both; }
+body.entering .goal { animation: hb-fadein 0.5s 0.9s both; }
+@keyframes hb-land { from { scale: 1.12; } }
+@keyframes hb-from-top { from { translate: 0 -150%; opacity: 0; } }
+@keyframes hb-from-bottom { from { translate: 0 150%; opacity: 0; } }
+@keyframes hb-from-left { from { translate: -170% 0; opacity: 0; } }
+@keyframes hb-from-right { from { translate: 170% 0; opacity: 0; } }
+/* 창 닫기: 복사본이 아래로 살짝 내려가며 사라져요 */
+.ghost-out { pointer-events: none !important; animation: hb-ghost 0.32s ease forwards !important; }
+.ghost-out * { animation: none !important; }
+.ghost-out > .sheet, .ghost-out > .start, .ghost-out > .celebrate { animation: hb-sheet-out 0.32s ease-in forwards !important; }
+@keyframes hb-ghost { from { opacity: 1; } to { opacity: 0; } }
+@keyframes hb-sheet-out { to { translate: 0 1.6em; scale: 0.96; opacity: 0; } }
+/* 친구 마을: 아래에서 위로 올라오고, 돌아갈 땐 아래로 내려가요 */
+.overlay.visit { animation: hb-from-bottom-full 0.5s cubic-bezier(.2,.8,.2,1) both; }
+.overlay.visit.leaving { pointer-events: none; animation: hb-to-bottom-full 0.38s cubic-bezier(.6,0,.8,.4) forwards; }
+@keyframes hb-from-bottom-full { from { translate: 0 100%; } }
+@keyframes hb-to-bottom-full { to { translate: 0 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .title *, .title, body.entering *, .ghost-out, .overlay.visit { animation-duration: 0.01s !important; animation-delay: 0s !important; }
+}
+/* 불러오는 동안 (첫 화면이 뜨기 전 빈 마을이 번쩍 보이지 않게) */
+.splash { position: fixed; inset: 0; z-index: 11; display: flex; align-items: center; justify-content: center; gap: 14px; background: #060920; transition: opacity 0.45s; }
+.splash.gone { opacity: 0; pointer-events: none; }
+.splash i { width: 12px; height: 12px; background: #ffd35a; box-shadow: 0 0 10px #ffb84a; animation: splash-dot 1s infinite ease-in-out; }
+.splash i:nth-child(2) { animation-delay: 0.15s; } .splash i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes splash-dot { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-10px); opacity: 1; } }

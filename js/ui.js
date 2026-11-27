@@ -80,7 +80,14 @@ export function openModal(html, cls = '', onClose = null) {
   modalOnClose = onClose;
   $('sheet').querySelectorAll('[data-close]').forEach(b => b.onclick = () => { sfx('click'); closeModal(); });
 }
+// 닫히는 창을 복사해 두고 천천히 사라지게 해요 (진짜 창은 바로 비워서 다른 코드에 영향 없음)
+export function ghostOut(el, cls = 'ghost-out') {
+  if (!el || el.classList.contains('hidden') || !el.parentNode) return;
+  const gh = el.cloneNode(true); gh.removeAttribute('id'); gh.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  gh.classList.add(cls); gh.setAttribute('aria-hidden', 'true'); el.after(gh); setTimeout(() => gh.remove(), 450);
+}
 export function closeModal() {
+  ghostOut($('modal'));
   $('modal').classList.add('hidden'); $('sheet').innerHTML = '';
   const f = modalOnClose; modalOnClose = null; f?.(); updateHud(true);
 }
@@ -551,7 +558,7 @@ export function openFriends() {
 
 let visitR = null, visitRAF = 0;
 export function visitFriend(d) {
-  const ov = $('overlay'); ov.classList.remove('hidden'); ov.style.background = '#3a8fcf';
+  const ov = $('overlay'); ov.classList.remove('hidden', 'leaving'); ov.classList.add('visit'); ov.style.background = '#3a8fcf';
   const crisisOn = () => d.crisis && !d.crisis.resolved && !(d.help && d.help.crisisAt === d.crisis.at);
   ov.innerHTML = `<canvas id="visitCv" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
     <div class="panel" style="position:absolute;top:.8em;left:50%;transform:translateX(-50%);font-size:1.4em;gap:.6em">
@@ -574,7 +581,14 @@ export function visitFriend(d) {
     visitRAF = requestAnimationFrame(loop);
   };
   visitRAF = requestAnimationFrame(loop);
-  const close = () => { cancelAnimationFrame(visitRAF); ov.classList.add('hidden'); ov.innerHTML = ''; ov.style.background = ''; updateHud(true); };
+  const close = () => {
+    ov.classList.add('leaving'); updateHud(true);
+    setTimeout(() => {
+      cancelAnimationFrame(visitRAF);
+      if (!ov.querySelector('#visitCv')) return;          // 그사이 다른 창이 열렸으면 그대로 둬요
+      ov.classList.add('hidden'); ov.classList.remove('visit', 'leaving'); ov.innerHTML = ''; ov.style.background = '';
+    }, 380);
+  };
   $('vBack').onclick = () => { sfx('click'); close(); };
   $('vWar') && ($('vWar').onclick = () => { sfx('click'); close(); ctx.openDeclare?.(d); });
   ov.querySelectorAll('[data-st]').forEach(b => b.onclick = async () => {
@@ -625,6 +639,15 @@ export function newEraNews() {
     <p class="muted">오른쪽 위 <b>저장</b> 버튼을 누르면 학급 서버에 바로 저장돼요.</p>
     <button class="btn gold" data-close style="font-size:1.3em">출발!</button></div>`, 'narrow');
   sfx('fanfare');
+}
+
+// 아이폰 등 전체 화면을 지원하지 않는 브라우저 → 홈 화면에 추가 안내
+export function fullHelp(ios) {
+  openModal(`${head('전체 화면으로 하기', 'full')}<div class="sh-body" style="text-align:center">
+    <p style="font-family:Jua;font-size:1.35em;margin:.2em 0">${ios ? '아이폰은 ‘홈 화면에 추가’로 앱처럼 꽉 찬 화면이 돼요' : '이 브라우저는 전체 화면을 지원하지 않아요'}</p>
+    ${ios ? `<ol class="fh-steps"><li>사파리 아래쪽 <b>공유</b> 버튼(네모에 화살표)을 눌러요</li><li><b>홈 화면에 추가</b>를 눌러요</li><li>홈 화면에 생긴 <b>히스토리 빌더</b> 아이콘으로 들어와요</li></ol>
+    <p class="muted">처음 한 번은 학급 코드·번호·이름을 다시 넣으면 내 마을이 그대로 이어져요.</p>` : '<p>크롬에서 열면 전체 화면으로 할 수 있어요.</p>'}
+    <button class="btn gold" data-close style="font-size:1.2em;margin-top:.4em">알겠어요</button></div>`, 'narrow');
 }
 
 // 첫 화면의 ‘새 소식’
@@ -961,16 +984,16 @@ export function celebrate({ from, to, completed }) {
   const html = completed
     ? `<div class="celebrate"><div class="big-title">역사 완성!</div><div class="sub">고조선부터 대한민국까지, 반만년 역사를 모두 지켰어요!</div><ul><li>무한 명성 랭킹 시작 — 퀴즈를 풀 때마다 명성 +1</li><li>명성 보너스 +2000</li></ul><button class="btn gold" id="celOk" style="font-size:1.4em">계속하기</button></div>`
     : `<div class="celebrate"><div style="font-size:1.6em">${from}단계 돌파!</div><div class="big-title">${era.name} 개막!</div><div class="sub">새로운 시대가 열렸어요</div><ul>${era.unlocks.map(u => `<li>${u}</li>`).join('')}<li>문제당 기본 KP ${ERAS[from].kpPerQ} → ${era.kpPerQ}</li></ul><button class="btn gold" id="celOk" style="font-size:1.4em">새 시대로!</button></div>`;
-  const ov = $('overlay'); ov.innerHTML = html; ov.classList.remove('hidden');
+  const ov = $('overlay'); ov.innerHTML = html; ov.classList.remove('hidden', 'visit', 'leaving'); ov.style.background = '';
   const cols = ['#ffd84a', '#e8443a', '#3d8fe0', '#3cbf5a', '#ffffff', '#b06ae0'];
   for (let i = 0; i < 70; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.left = Math.random() * 100 + '%'; c.style.background = cols[i % cols.length]; c.style.animationDuration = 2 + Math.random() * 2.5 + 's'; c.style.animationDelay = Math.random() * 1.2 + 's'; ov.appendChild(c); }
-  $('celOk').onclick = () => { sfx('click'); ov.classList.add('hidden'); ov.innerHTML = ''; updateHud(true); };
+  $('celOk').onclick = () => { sfx('click'); ghostOut(ov); ov.classList.add('hidden'); ov.innerHTML = ''; updateHud(true); };
 }
 
 // ---------- 시작 화면 ----------
 export function startScreen(edit = false, onDone = null, opt = {}) {
   const s = G.s; let av = s?.avatar || 0;
-  const ov = $('overlay'); ov.classList.remove('hidden');
+  const ov = $('overlay'); ov.classList.remove('hidden', 'visit', 'leaving'); ov.style.background = '';
   ov.innerHTML = `<form class="start" id="startForm">
     <h1 class="logo">히스토리 빌더<small>초등 한국사 시대 발전 타이쿤</small></h1>
     <div class="avatars">${AVATARS.map((a, i) => `<button type="button" data-av="${i}" class="${i === av ? 'on' : ''}"><img src="${avatarURL(i)}" alt="얼굴 ${i + 1}"></button>`).join('')}</div>
@@ -982,13 +1005,13 @@ export function startScreen(edit = false, onDone = null, opt = {}) {
     ${edit ? '' : `<p class="muted" style="margin:.8em 0 0">${sync.configured ? '다른 크롬북에서 하던 마을도 같은 학급 코드·번호·이름으로 들어오면 이어서 할 수 있어요.' : '다른 기기에서 하던 마을이 있으면 시작 후 ‘설정 → 백업 코드’로 불러올 수 있어요.'}</p>`}
     ${opt.onCancel ? '<button type="button" class="st-back" id="stBack">처음 화면으로</button>' : ''}
   </form>`;
-  if (opt.onCancel) $('stBack').onclick = () => { sfx('click'); ov.classList.add('hidden'); ov.innerHTML = ''; opt.onCancel(); };
+  if (opt.onCancel) $('stBack').onclick = () => { sfx('click'); ghostOut(ov); ov.classList.add('hidden'); ov.innerHTML = ''; opt.onCancel(); };
   ov.querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = Number(b.dataset.av); ov.querySelectorAll('[data-av]').forEach(x => x.classList.toggle('on', x === b)); sfx('click'); });
   $('startForm').onsubmit = e => {
     e.preventDefault();
     const profile = { studentNo: Number($('stNo').value) || 0, name: $('stName').value.trim().slice(0, 8), classCode: $('stClass').value.trim().toLowerCase().replace(/[^a-z0-9가-힣_-]/g, '').slice(0, 16), avatar: av };
     if (!profile.name || (sync.configured && !profile.classCode)) return;
-    const finish = () => { ov.classList.add('hidden'); ov.innerHTML = ''; };
+    const finish = () => { ghostOut(ov); ov.classList.add('hidden'); ov.innerHTML = ''; };
     if (edit && G.s) { finish(); Object.assign(G.s, { name: profile.name, avatar: av, studentNo: sync.enabled ? G.s.studentNo : profile.studentNo, classCode: sync.enabled ? G.s.classCode : profile.classCode }); GM.save('profile'); $('avatar').src = avatarURL(av); updateHud(true); opt.onSaved?.(); return; }
     const btn = $('startForm').querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = '마을 찾는 중…';
     Promise.resolve(onDone?.(profile, msg => { $('stMsg').textContent = msg; $('stMsg').style.color = '#c8352b'; btn.disabled = false; btn.textContent = '역사 마을 시작하기!'; })).then(ok => { if (ok !== false) finish(); });
