@@ -1,21 +1,21 @@
 // =============================================================
 //  히스토리 빌더 — 시작점: 게임 루프, 입력(클릭·드래그·확대), 배치 모드
 // =============================================================
-import * as GM from './game.js?v=202611271114';
-import { G } from './game.js?v=202611271114';
-import * as UI from './ui.js?v=202611271114';
-import { ctx } from './ui.js?v=202611271114';
-import { Renderer } from './render.js?v=202611271114';
-import * as S from './sprites.js?v=202611271114';
-import * as E from './economy.js?v=202611271114';
-import { B, D } from './data-buildings.js?v=202611271114';
-import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271114';
-import { sync } from './sync.js?v=202611271114';
-import { preloadImages, uiImages } from './images.js?v=202611271114';
-import { initSocial } from './social.js?v=202611271114';
-import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271114';
-import * as Title from './title.js?v=202611271114';
-import * as FS from './fullscreen.js?v=202611271114';
+import * as GM from './game.js?v=202611271115';
+import { G } from './game.js?v=202611271115';
+import * as UI from './ui.js?v=202611271115';
+import { ctx } from './ui.js?v=202611271115';
+import { Renderer } from './render.js?v=202611271115';
+import * as S from './sprites.js?v=202611271115';
+import * as E from './economy.js?v=202611271115';
+import { B, D } from './data-buildings.js?v=202611271115';
+import { sfx, setBgm, setSfx, unlockAudio } from './audio.js?v=202611271115';
+import { sync } from './sync.js?v=202611271115';
+import { preloadImages, uiImages } from './images.js?v=202611271115';
+import { initSocial } from './social.js?v=202611271115';
+import { TEACHER_MODE, TEACHER_CLASS, TEACHER_NO, VERSION } from './mode.js?v=202611271115';
+import * as Title from './title.js?v=202611271115';
+import * as FS from './fullscreen.js?v=202611271115';
 
 const $ = id => document.getElementById(id);
 const cv = $('world');
@@ -147,7 +147,8 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------- 버튼 ----------
-const btn = (id, fn) => $(id).addEventListener('click', () => { unlockAudio(); sfx('click'); fn(); });
+// 버튼이 없으면(예전 화면 파일이 남아 있을 때) 그냥 넘어가요
+const btn = (id, fn) => $(id)?.addEventListener('click', () => { unlockAudio(); sfx('click'); fn(); });
 btn('btnQuiz', UI.openQuizMenu);
 btn('btnBuild', () => UI.openShop('b'));
 btn('btnShop', () => UI.openShop('d'));

@@ -30,7 +30,7 @@ function loadOne(path) {
 export async function preloadImages() {
   let list = [];
   try {
-    const r = await fetch('img/list.json?v=202611271114', { cache: 'no-cache' });
+    const r = await fetch('img/list.json?v=202611271115', { cache: 'no-cache' });
     if (r.ok) list = await r.json();
   } catch (e) { list = []; }
   if (!Array.isArray(list) || !list.length) return 0;
